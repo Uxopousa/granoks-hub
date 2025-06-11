@@ -1,40 +1,111 @@
-# Granoks-Hub
+# Granoks-Hub ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
+Mini-ERP Coffee 4.0 con dashboard en tiempo real, POS básico y simulación IoT de sensores.
 
-**Granoks-Hub** es un mini-ERP Coffee 4.0 que integra:
+---
 
-* **Dashboard en tiempo real** de temperatura y nivel de granos (simulación IoT con WebSocket + Chart.js).
-* **Punto de venta básico (POS)** para gestionar pedidos y sistema de puntos (+50 puntos por pedido).
-* **Simulación de sensores** sin hardware real, con datos aleatorios enviados cada 2 segundos.
-* **Canje de promociones** directo desde la interfaz, sin lógica compleja.
+## Prerrequisitos
 
-## 📋 Características principales
+- **Java** 21  
+- **Maven** 3.8+  
+- **MySQL** 8.x (o Docker) escuchando en `localhost:3306`, con base de datos `granoks_hub` y un usuario con permisos.
 
-* **Monitorización en vivo**: gráfica de temperatura y nivel de granos actualizada al instante.
-* **Gestión de pedidos**: CRUD de pedidos y actualización automática de puntos de usuario.
-* **Gamificación ligera**: acumula puntos y canjéalos por promociones.
-* **API REST**: endpoints para crear y listar pedidos en formato JSON.
+## Funcionalidades
 
-## 🛠️ Tecnologías y herramientas
+- **Dashboard en vivo**  
+  Gráficas de temperatura (70–80 °C) y nivel de granos (0–100 %) enviadas por WebSocket (STOMP/SockJS) y renderizadas con Chart.js.
 
-* **Lenguaje**: Java 21
-* **Framework**: Spring Boot (Web, Data JPA, WebSocket, Scheduling)
-* **Persistencia**: MySQL configurada para desarrollo local (JPA se encarga de crear y actualizar tablas automáticamente)
-* **Frontend**: Thymeleaf, Chart.js, STOMP/SockJS
-* **Testing**: JUnit, Mockito
+- **Punto de venta (POS)**  
+  CRUD de pedidos y sistema de puntos (+50 puntos por pedido). Visualización instantánea del saldo de cada usuario.
 
-## 📡 Endpoints API REST
+- **Simulación IoT**  
+  Servicio programado (`@Scheduled`) que envía datos aleatorios cada 2 s, sin hardware real.
 
-| Método | Ruta           | Descripción              |
-| ------ | -------------- | ------------------------ |
-| GET    | `/api/pedidos` | Listar todos los pedidos |
-| POST   | `/api/pedidos` | Crear un nuevo pedido    |
+- **Promociones**  
+  Entidad `Promo` sencilla (id, descripción, costePuntos) y canje de puntos desde la UI.
 
-## 👥 Desarrollo
+---
 
-Este proyecto es desarrollado y mantenido por Uxopousa.
+## Tecnologías y versiones
 
-## 📄 Licencia
+- **Java** 21  
+- **Spring Boot** 3.2.x  
+- **Spring WebSocket (STOMP + SockJS)**  
+- **Spring Data JPA**  
+- **MySQL** (perfil `dev`) / **H2** (in-memory, perfil `test`)  
+- **Thymeleaf**  
+- **Chart.js** (v4.x desde CDN)  
+- **JUnit Jupiter & Mockito**  
 
-Este proyecto está bajo la **licencia MIT**. Consulta el archivo [LICENSE.md](LICENSE.md) para más detalles.
+---
+
+## Estructura del proyecto
+
+```
+granoks-hub/
+├─ src/
+│  ├─ main/
+│  │  ├─ java/com/uxopousa/granokshub/
+│  │  │  ├─ config/       ← WebSocket, Scheduling, Profiles
+│  │  │  ├─ model/        ← Pedido, Usuario, Promo
+│  │  │  ├─ repo/         ← JpaRepositories
+│  │  │  ├─ service/      ← Lógica de pedidos y simulación IoT
+│  │  │  ├─ web/          ← @Controller & @RestController
+│  │  │  └─ dto/          ← Clases DTO para API REST
+│  │  └─ resources/
+│  │     ├─ templates/    ← Thymeleaf (.html)
+│  │     ├─ application-dev.yml
+│  │     └─ application-test.yml
+│  └─ test/
+│     └─ java/...         ← Tests unitarios
+├─ .gitignore
+├─ LICENSE.md
+└─ pom.xml
+```
+
+---
+
+## Endpoints API REST
+
+| Método | Ruta                          | Descripción                   |
+|:-------|:------------------------------|:------------------------------|
+| GET    | `/api/pedidos`                | Lista todos los pedidos       |
+| POST   | `/api/pedidos`                | Crea un nuevo pedido          |
+| GET    | `/api/promos`                 | Lista promociones disponibles |
+| POST   | `/api/promos/{id}/redeem`     | Canjea una promoción          |
+
+**Ejemplo**:  
+```bash
+curl -X POST http://localhost:8080/api/pedidos   -H "Content-Type: application/json"   -d '{"producto":"Espresso","total":2.50,"username":"cliente1"}'
+```
+
+---
+
+## Uso rápido
+
+1. Clona el repositorio  
+   ```bash
+   git clone https://github.com/Uxopousa/granoks-hub.git
+   cd granoks-hub
+   ```
+2. Ajusta tus credenciales MySQL en `src/main/resources/application-dev.yml`.  
+3. Ejecuta la aplicación en perfil dev  
+   ```bash
+   mvn clean spring-boot:run -Dspring-boot.run.profiles=dev
+   ```
+4. Accede en tu navegador  
+   - **Dashboard**: `http://localhost:8080/dashboard`  
+   - **POS**:       `http://localhost:8080/pedidos`  
+   - **API REST**: `http://localhost:8080/api/pedidos`
+
+---
+
+## Mantenimiento
+
+Proyecto mantenido por **Uxopousa**.  
+
+---
+
+## Licencia
+
+Este proyecto está bajo la [MIT License](LICENSE.md).  
