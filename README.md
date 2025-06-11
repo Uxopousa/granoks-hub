@@ -2,6 +2,13 @@
 
 Mini-ERP Coffee 4.0 con dashboard en tiempo real, POS básico y simulación IoT de sensores.
 
+**Granoks-Hub** es una demo de “mini-ERP” para cafeterías, que permite:
+
+- **Vigilar en directo** la temperatura y el nivel de granos de la cafetera (simulado).  
+- **Registrar pedidos** al instante y acumular 50 puntos por cada café.  
+- **Canjear puntos** por promociones desde la misma interfaz.  
+- **Mostrar datos en vivo**: la aplicación recibe y muestra automáticamente información de “sensores” cada pocos segundos.
+
 ---
 
 ## Prerrequisitos
