@@ -10,13 +10,15 @@ Mini-ERP Coffee 4.0 con dashboard en tiempo real, POS básico y simulación IoT 
 - **Maven** 3.8+  
 - **MySQL** 8.x (o Docker) escuchando en `localhost:3306`, con base de datos `granoks_hub` y un usuario con permisos.
 
+---
+
 ## Funcionalidades
 
 - **Dashboard en vivo**  
   Gráficas de temperatura (70–80 °C) y nivel de granos (0–100 %) enviadas por WebSocket (STOMP/SockJS) y renderizadas con Chart.js.
 
 - **Punto de venta (POS)**  
-  CRUD de pedidos y sistema de puntos (+50 puntos por pedido). Visualización instantánea del saldo de cada usuario.
+  CRUD de pedidos y sistema de puntos (+50 puntos/pedido). Visualización instantánea del saldo de cada usuario.
 
 - **Simulación IoT**  
   Servicio programado (`@Scheduled`) que envía datos aleatorios cada 2 s, sin hardware real.
@@ -32,10 +34,10 @@ Mini-ERP Coffee 4.0 con dashboard en tiempo real, POS básico y simulación IoT 
 - **Spring Boot** 3.2.x  
 - **Spring WebSocket (STOMP + SockJS)**  
 - **Spring Data JPA**  
-- **MySQL** (perfil `dev`) / **H2** (in-memory, perfil `test`)  
+- **MySQL** configurado en `application.properties`  
 - **Thymeleaf**  
 - **Chart.js** (v4.x desde CDN)  
-- **JUnit Jupiter & Mockito**  
+- **JUnit Jupiter & Mockito**
 
 ---
 
@@ -46,7 +48,7 @@ granoks-hub/
 ├─ src/
 │  ├─ main/
 │  │  ├─ java/com/uxopousa/granokshub/
-│  │  │  ├─ config/       ← WebSocket, Scheduling, Profiles
+│  │  │  ├─ config/       ← WebSocket, Scheduling
 │  │  │  ├─ model/        ← Pedido, Usuario, Promo
 │  │  │  ├─ repo/         ← JpaRepositories
 │  │  │  ├─ service/      ← Lógica de pedidos y simulación IoT
@@ -54,8 +56,7 @@ granoks-hub/
 │  │  │  └─ dto/          ← Clases DTO para API REST
 │  │  └─ resources/
 │  │     ├─ templates/    ← Thymeleaf (.html)
-│  │     ├─ application-dev.yml
-│  │     └─ application-test.yml
+│  │     └─ application.properties
 │  └─ test/
 │     └─ java/...         ← Tests unitarios
 ├─ .gitignore
@@ -67,16 +68,18 @@ granoks-hub/
 
 ## Endpoints API REST
 
-| Método | Ruta                          | Descripción                   |
-|:-------|:------------------------------|:------------------------------|
-| GET    | `/api/pedidos`                | Lista todos los pedidos       |
-| POST   | `/api/pedidos`                | Crea un nuevo pedido          |
-| GET    | `/api/promos`                 | Lista promociones disponibles |
-| POST   | `/api/promos/{id}/redeem`     | Canjea una promoción          |
+| Método | Ruta                       | Descripción                   |
+|:-------|:---------------------------|:------------------------------|
+| GET    | `/api/pedidos`             | Lista todos los pedidos       |
+| POST   | `/api/pedidos`             | Crea un nuevo pedido          |
+| GET    | `/api/promos`              | Lista promociones disponibles |
+| POST   | `/api/promos/{id}/redeem`  | Canjea una promoción          |
 
 **Ejemplo**:  
 ```bash
-curl -X POST http://localhost:8080/api/pedidos   -H "Content-Type: application/json"   -d '{"producto":"Espresso","total":2.50,"username":"cliente1"}'
+curl -X POST http://localhost:8080/api/pedidos \
+  -H "Content-Type: application/json" \
+  -d '{"producto":"Espresso","total":2.50,"username":"cliente1"}'
 ```
 
 ---
@@ -88,10 +91,11 @@ curl -X POST http://localhost:8080/api/pedidos   -H "Content-Type: application/j
    git clone https://github.com/Uxopousa/granoks-hub.git
    cd granoks-hub
    ```
-2. Ajusta tus credenciales MySQL en `src/main/resources/application-dev.yml`.  
-3. Ejecuta la aplicación en perfil dev  
+2. Ajusta tus credenciales MySQL en  
+   `src/main/resources/application.properties`.  
+3. Ejecuta la aplicación  
    ```bash
-   mvn clean spring-boot:run -Dspring-boot.run.profiles=dev
+   mvn clean spring-boot:run
    ```
 4. Accede en tu navegador  
    - **Dashboard**: `http://localhost:8080/dashboard`  
@@ -102,10 +106,10 @@ curl -X POST http://localhost:8080/api/pedidos   -H "Content-Type: application/j
 
 ## Mantenimiento
 
-Proyecto mantenido por **Uxopousa**.  
+Proyecto mantenido por **Uxopousa**.
 
 ---
 
 ## Licencia
 
-Este proyecto está bajo la [MIT License](LICENSE.md).  
+Este proyecto está bajo la [MIT License](LICENSE.md).
