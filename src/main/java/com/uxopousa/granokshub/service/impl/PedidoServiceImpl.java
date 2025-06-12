@@ -27,4 +27,5 @@ public class PedidoServiceImpl implements PedidoService {
   public List<PedidoDto> consultaPedido() {
     return pedidoMapper.toDto(pedidoRepository.findAll());
   }
+
 }
