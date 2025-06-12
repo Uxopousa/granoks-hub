@@ -1,9 +1,17 @@
 package com.uxopousa.granokshub.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "pedido")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Pedido {
 
     @Id
@@ -17,28 +25,4 @@ public class Pedido {
     @JoinColumn(name = "usuario_username")
     private Usuario usuario;
 
-    public Pedido() {}
-
-    // getters & setters
-    public Long getId() {
-        return id;
-    }
-    public String getProducto() {
-        return producto;
-    }
-    public void setProducto(String producto) {
-        this.producto = producto;
-    }
-    public double getTotal() {
-        return total;
-    }
-    public void setTotal(double total) {
-        this.total = total;
-    }
-    public Usuario getUsuario() {
-        return usuario;
-    }
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
 }
