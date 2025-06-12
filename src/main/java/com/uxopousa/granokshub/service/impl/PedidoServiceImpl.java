@@ -4,6 +4,7 @@ import com.uxopousa.granokshub.dto.PedidoDto;
 import com.uxopousa.granokshub.mapper.PedidoMapper;
 import com.uxopousa.granokshub.repo.PedidoRepository;
 import com.uxopousa.granokshub.service.PedidoService;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,5 +21,10 @@ public class PedidoServiceImpl implements PedidoService {
   @Override
   public PedidoDto consultaPedido(Long codPedido) {
     return pedidoMapper.toDto(pedidoRepository.findById(codPedido).orElse(null));
+  }
+
+  @Override
+  public List<PedidoDto> consultaPedido() {
+    return pedidoMapper.toDto(pedidoRepository.findAll());
   }
 }
