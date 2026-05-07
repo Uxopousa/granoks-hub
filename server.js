@@ -4,8 +4,16 @@ const path = require("path");
 const db = new Database(path.join(__dirname, "granoks.db"));
 db.pragma("journal_mode = WAL"); db.pragma("foreign_keys = ON");
 db.exec("CREATE TABLE IF NOT EXISTS usuario (username TEXT PRIMARY KEY, puntos INTEGER DEFAULT 0)");
+db.exec("CREATE TABLE IF NOT EXISTS pedido (id INTEGER PRIMARY KEY AUTOINCREMENT, producto TEXT NOT NULL, total REAL NOT NULL, usuario_username TEXT NOT NULL REFERENCES usuario(username), created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)");
 const app = express();
 app.use(express.json({ limit: "50kb" }));
+app.post("/api/pedidos", (q, r) => {
+  const p = q.body;
+  if (!p.producto || !p.total || !p.username) return r.status(400).json({ error: "Faltan datos" });
+  const result = db.prepare("INSERT INTO pedido (producto, total, usuario_username, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)").run(p.producto, p.total, p.username);
+  db.prepare("UPDATE usuario SET puntos = puntos + 50 WHERE username = ?").run(p.username);
+  r.status(201).json({ pedido: { id: result.lastInsertRowid, producto: p.producto, total: p.total, usuario_username: p.username }, puntos: 50 });
+});
 app.get("/api/usuarios/:username", (q, r) => {
   const u = (q.params.username || "").trim();
   if (!u) return r.status(400).json({ error: "Username requerido" });
