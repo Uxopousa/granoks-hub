@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require("http");
 const Database = require("better-sqlite3");
 const path = require("path");
 const db = new Database(path.join(__dirname, "granoks.db"));
@@ -9,7 +10,9 @@ db.exec("CREATE TABLE IF NOT EXISTS promo (id INTEGER PRIMARY KEY AUTOINCREMENT,
 const pc = db.prepare("SELECT COUNT(*) c FROM promo").get().c;
 if (pc===0) { db.prepare("INSERT INTO promo (descripcion, coste_puntos) VALUES (?,?)").run("Cafe gratis",50); db.prepare("INSERT INTO promo (descripcion, coste_puntos) VALUES (?,?)").run("Descuento 20%",100); db.prepare("INSERT INTO promo (descripcion, coste_puntos) VALUES (?,?)").run("Taza personalizada",200); }
 const app = express();
+const server = http.createServer(app);
 app.use(express.json({ limit: "50kb" }));
+app.use(express.static(path.join(__dirname, "public")));
 app.get("/api/pedidos", (q, r) => r.json(db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p ORDER BY p.id DESC").all()));
 app.get("/api/promos", (q, r) => r.json(db.prepare("SELECT * FROM promo").all()));
 app.post("/api/pedidos", (q, r) => {
@@ -27,4 +30,4 @@ app.get("/api/usuarios/:username", (q, r) => {
   r.json(us);
 });
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log("Granoks-Hub corriendo en http://localhost:" + PORT));
+server.listen(PORT, () => console.log("Granoks-Hub corriendo en http://localhost:" + PORT));
