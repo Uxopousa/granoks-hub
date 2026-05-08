@@ -1,0 +1,6 @@
+<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><title>POS - Granoks</title><style>body{font-family:sans-serif;max-width:800px;margin:auto;padding:20px}input{margin:4px;padding:6px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px}</style></head><body>
+<h1>Punto de venta</h1>
+<form id=pf style='margin:16px 0'><input name=producto placeholder=Producto><input name=total type=number step=0.01 placeholder=Total><input name=username placeholder=Usuario><button>Crear pedido</button></form>
+<h2>Ultimos pedidos</h2><table><thead><tr><th>ID</th><th>Producto</th><th>Total</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody id=tb></tbody></table>
+<script>async function c(){const p=await(await fetch('/api/pedidos')).json();document.getElementById('tb').innerHTML=p.map(x=>'<tr><td>'+x.id+'</td><td>'+x.producto+'</td><td>'+x.total+'</td><td>'+x.usuario_username+'</td><td>'+(x.created_at||'')+'</td></tr>').join('')};document.getElementById('pf').onsubmit=async function(e){e.preventDefault();const f=new FormData(this);await fetch('/api/pedidos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:f.get('producto'),total:+f.get('total'),username:f.get('username')})});c()};c();</script>
+</body></html>
