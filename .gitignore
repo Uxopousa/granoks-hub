@@ -1,0 +1,6 @@
+node_modules/
+granoks.db
+granoks.db-shm
+granoks.db-wal
+*.log
+
