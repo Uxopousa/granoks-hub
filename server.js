@@ -33,5 +33,7 @@ app.get("/api/usuarios/:username", (q, r) => {
   r.json(us);
 });
 io.on("connection", s => { console.log("Cliente:", s.id); s.on("disconnect", () => console.log("Desconectado:", s.id)); });
+function simularSensores(){io.emit("sensores",{temperatura:+(70+Math.random()*10).toFixed(1),nivelGrano:+(Math.random()*100).toFixed(1),timestamp:Date.now()})}
+setInterval(simularSensores,2000);
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log("Granoks-Hub corriendo en http://localhost:" + PORT));
