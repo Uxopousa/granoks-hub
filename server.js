@@ -25,6 +25,17 @@ app.post("/api/pedidos", (q, r) => {
   io.emit("nuevo-pedido", { id: result.lastInsertRowid, producto: p.producto, total: p.total, usuario_username: p.username });
   r.status(201).json({ pedido: { id: result.lastInsertRowid, producto: p.producto, total: p.total, usuario_username: p.username }, puntos: 50 });
 });
+app.post("/api/promos/:id/redeem", (q, r) => {
+  const username = (q.body.username || "").trim();
+  if (!username) return r.status(400).json({ error: "Username requerido" });
+  const promo = db.prepare("SELECT * FROM promo WHERE id = ?").get(q.params.id);
+  if (!promo) return r.status(404).json({ error: "Promo no encontrada" });
+  const user = db.prepare("SELECT * FROM usuario WHERE username = ?").get(username);
+  if (!user) return r.status(404).json({ error: "Usuario no encontrado" });
+  const updated = db.prepare("UPDATE usuario SET puntos = puntos - ? WHERE username = ? AND puntos >= ?").run(promo.coste_puntos, username, promo.coste_puntos);
+  if (updated.changes === 0) return r.status(400).json({ error: "Puntos insuficientes" });
+  r.json({ message: "Promo canjeada", puntos: db.prepare("SELECT puntos FROM usuario WHERE username = ?").get(username).puntos });
+});
 app.get("/api/usuarios/:username", (q, r) => {
   const u = (q.params.username || "").trim();
   if (!u) return r.status(400).json({ error: "Username requerido" });
