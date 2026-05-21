@@ -10,6 +10,8 @@ db.exec("CREATE TABLE IF NOT EXISTS pedido (id INTEGER PRIMARY KEY AUTOINCREMENT
 db.exec("CREATE TABLE IF NOT EXISTS promo (id INTEGER PRIMARY KEY AUTOINCREMENT, descripcion TEXT NOT NULL, coste_puntos INTEGER NOT NULL)");
 const pc = db.prepare("SELECT COUNT(*) c FROM promo").get().c;
 if (pc===0) { db.prepare("INSERT INTO promo (descripcion, coste_puntos) VALUES (?,?)").run("Cafe gratis",50); db.prepare("INSERT INTO promo (descripcion, coste_puntos) VALUES (?,?)").run("Descuento 20%",100); db.prepare("INSERT INTO promo (descripcion, coste_puntos) VALUES (?,?)").run("Taza personalizada",200); }
+const uc = db.prepare("SELECT COUNT(*) c FROM usuario").get().c;
+if (uc===0) db.prepare("INSERT INTO usuario (username, puntos) VALUES (?,?)").run("cliente1",0);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 10000, pingTimeout: 5000 });
