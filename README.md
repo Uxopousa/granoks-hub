@@ -23,5 +23,5 @@ npm start
 | GET /api/usuarios/:username | Consulta usuario |
 
 ## Stack
-Express + Socket.io + better-sqlite3 + Tailwind CSS + Chart.js
+Express + Socket.io + better-sqlite3 + Chart.js
 
