@@ -17,6 +17,11 @@ const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 10000, pingTimeout: 5000 });
 app.use(express.json({ limit: "50kb" }));
 app.use(express.static(path.join(__dirname, "public")));
+function normalizarTexto(value) { return typeof value === 'string' ? value.trim() : ''; }
+function normalizarTotal(value) { const t = Number(value); return Number.isFinite(t) ? Math.round(t * 100) / 100 : NaN; }
+function obtenerPedido(id) {
+  return db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE p.id = ?").get(id);
+}
 app.get("/api/pedidos", (q, r) => r.json(db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p ORDER BY p.id DESC").all()));
 app.get("/api/promos", (q, r) => r.json(db.prepare("SELECT * FROM promo").all()));
 app.post("/api/pedidos", (q, r) => {
@@ -24,8 +29,8 @@ app.post("/api/pedidos", (q, r) => {
   if (!p.producto || !p.total || !p.username) return r.status(400).json({ error: "Faltan datos" });
   const result = db.prepare("INSERT INTO pedido (producto, total, usuario_username, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)").run(p.producto, p.total, p.username);
   db.prepare("UPDATE usuario SET puntos = puntos + 50 WHERE username = ?").run(p.username);
-  io.emit("nuevo-pedido", { id: result.lastInsertRowid, producto: p.producto, total: p.total, usuario_username: p.username });
-  r.status(201).json({ pedido: { id: result.lastInsertRowid, producto: p.producto, total: p.total, usuario_username: p.username }, puntos: 50 });
+  io.emit("nuevo-pedido", obtenerPedido(result.lastInsertRowid));
+  r.status(201).json({ pedido: obtenerPedido(result.lastInsertRowid), puntos: 50 });
 });
 app.post("/api/promos/:id/redeem", (q, r) => {
   const username = (q.body.username || "").trim();
