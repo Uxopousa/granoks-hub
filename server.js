@@ -17,23 +17,38 @@ const server = http.createServer(app);
 const io = new Server(server, { pingInterval: 10000, pingTimeout: 5000 });
 app.use(express.json({ limit: "50kb" }));
 app.use(express.static(path.join(__dirname, "public")));
+
 function normalizarTexto(value) { return typeof value === 'string' ? value.trim() : ''; }
+
 function normalizarTotal(value) { const t = Number(value); return Number.isFinite(t) ? Math.round(t * 100) / 100 : NaN; }
+
 function obtenerPedido(id) {
   return db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE p.id = ?").get(id);
 }
+
+const crearPedidoTransaction = db.transaction(({ producto, total, username }) => {
+  const user = db.prepare("SELECT * FROM usuario WHERE username = ?").get(username);
+  if (!user) db.prepare("INSERT INTO usuario (username, puntos) VALUES (?, ?)").run(username, 0);
+  const result = db.prepare("INSERT INTO pedido (producto, total, usuario_username, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)").run(producto, total, username);
+  db.prepare("UPDATE usuario SET puntos = puntos + 50 WHERE username = ?").run(username);
+  return { pedido: obtenerPedido(result.lastInsertRowid), usuario: db.prepare("SELECT * FROM usuario WHERE username = ?").get(username) };
+});
+
+const canjearPromoTransaction = db.transaction(({ promo, username }) => {
+  const updated = db.prepare("UPDATE usuario SET puntos = puntos - ? WHERE username = ? AND puntos >= ?").run(promo.coste_puntos, username, promo.coste_puntos);
+  if (updated.changes === 0) return null;
+  return db.prepare("SELECT * FROM usuario WHERE username = ?").get(username);
+});
+
 app.get("/api/pedidos", (q, r) => r.json(db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p ORDER BY p.id DESC").all()));
-app.get("/api/promos", (q, r) => r.json(db.prepare("SELECT * FROM promo").all()));
 app.post("/api/pedidos", (q, r) => {
   const p = q.body;
   if (!p.producto || !p.total || !p.username) return r.status(400).json({ error: "Faltan datos" });
-  const result = db.prepare("INSERT INTO pedido (producto, total, usuario_username, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)").run(p.producto, p.total, p.username);
-  db.prepare("UPDATE usuario SET puntos = puntos + 50 WHERE username = ?").run(p.username);
-  const pedido = obtenerPedido(result.lastInsertRowid);
+  const { pedido, usuario } = crearPedidoTransaction({ producto: p.producto, total: p.total, username: p.username });
   io.emit("nuevo-pedido", pedido);
-  const usuario = db.prepare("SELECT * FROM usuario WHERE username = ?").get(p.username);
   r.status(201).json({ pedido, puntos: usuario.puntos });
 });
+app.get("/api/promos", (q, r) => r.json(db.prepare("SELECT * FROM promo").all()));
 app.post("/api/promos/:id/redeem", (q, r) => {
   const username = (q.body.username || "").trim();
   if (!username) return r.status(400).json({ error: "Username requerido" });
@@ -41,9 +56,9 @@ app.post("/api/promos/:id/redeem", (q, r) => {
   if (!promo) return r.status(404).json({ error: "Promo no encontrada" });
   const user = db.prepare("SELECT * FROM usuario WHERE username = ?").get(username);
   if (!user) return r.status(404).json({ error: "Usuario no encontrado" });
-  const updated = db.prepare("UPDATE usuario SET puntos = puntos - ? WHERE username = ? AND puntos >= ?").run(promo.coste_puntos, username, promo.coste_puntos);
-  if (updated.changes === 0) return r.status(400).json({ error: "Puntos insuficientes" });
-  r.json({ message: "Promo canjeada", puntos: db.prepare("SELECT puntos FROM usuario WHERE username = ?").get(username).puntos });
+  const updatedUser = canjearPromoTransaction({ promo, username });
+  if (!updatedUser) return r.status(400).json({ error: "Puntos insuficientes" });
+  r.json({ message: "Promo canjeada", puntos: updatedUser.puntos });
 });
 app.get("/api/usuarios/:username", (q, r) => {
   const u = (q.params.username || "").trim();
