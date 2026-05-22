@@ -29,8 +29,10 @@ app.post("/api/pedidos", (q, r) => {
   if (!p.producto || !p.total || !p.username) return r.status(400).json({ error: "Faltan datos" });
   const result = db.prepare("INSERT INTO pedido (producto, total, usuario_username, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)").run(p.producto, p.total, p.username);
   db.prepare("UPDATE usuario SET puntos = puntos + 50 WHERE username = ?").run(p.username);
-  io.emit("nuevo-pedido", obtenerPedido(result.lastInsertRowid));
-  r.status(201).json({ pedido: obtenerPedido(result.lastInsertRowid), puntos: 50 });
+  const pedido = obtenerPedido(result.lastInsertRowid);
+  io.emit("nuevo-pedido", pedido);
+  const usuario = db.prepare("SELECT * FROM usuario WHERE username = ?").get(p.username);
+  r.status(201).json({ pedido, puntos: usuario.puntos });
 });
 app.post("/api/promos/:id/redeem", (q, r) => {
   const username = (q.body.username || "").trim();
