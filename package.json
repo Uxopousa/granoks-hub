@@ -1,1 +1,1 @@
-{"name":"granoks-hub-node","version":"1.0.0","description":"Mini-ERP Coffee 4.0 - Migrado a Node.js","main":"server.js","scripts":{"start":"node server.js","dev":"node --watch server.js"},"dependencies":{"express":"^4.21.0","socket.io":"^4.7.5","better-sqlite3":"^11.3.0"}}
+{"name":"granoks-hub-node","version":"1.0.0","description":"Mini-ERP Coffee 4.0 - Migrado a Node.js","main":"server.js","scripts":{"start":"node server.js","dev":"node --watch server.js","test":"node --test"},"dependencies":{"express":"^4.21.0","socket.io":"^4.7.5","better-sqlite3":"^11.3.0"}}
