@@ -1,19 +1,14 @@
-<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><title>POS - Granoks</title><script src=https://cdn.socket.io/4.7.5/socket.io.min.js></script><style>body{font-family:sans-serif;max-width:1000px;margin:auto;padding:20px}input,button{margin:4px;padding:6px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px;vertical-align:top}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.card{border:1px solid #ddd;border-radius:8px;padding:16px}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.promos{display:grid;gap:10px}.promo{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid #eee;border-radius:6px;padding:10px}.muted{color:#666}</style></head><body>
+<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><title>POS - Granoks</title><link rel=stylesheet href=/css/styles.css><script src=https://cdn.socket.io/4.7.5/socket.io.min.js></script><script defer src=/js/pedidos.js></script></head><body class=pos-page>
 <h1>Punto de venta</h1>
-<div class=row style="margin-bottom:16px"><a href=/index.html>Dashboard</a><span>|</span><label>Usuario:<input id=uInput value=cliente1 size=12></label><button id=uBtn>Actualizar puntos</button><strong id=puntos></strong></div>
-<div class=grid>
-<section class=card>
+<div class="row pos-toolbar"><a href=/index.html>Dashboard</a><span>|</span><label>Usuario:<input id=uInput value=cliente1 size=12></label><button id=uBtn>Actualizar puntos</button><strong id=puntos></strong></div>
+<div class=pos-main>
+<section class=pos-card>
 <h2>Crear pedido</h2>
 <form id=pf><input name=producto placeholder=Producto required><input name=total type=number step=0.01 placeholder=Total required><input name=username placeholder=Usuario required><button>Crear pedido</button></form>
 </section>
-<section class=card>
+<section class=pos-card>
 <h2>Promos disponibles</h2><p class=muted>Selecciona un usuario y canjea una promo con sus puntos.</p><div id=promos class=promos>Cargando...</div>
 </section>
 </div>
-<section class=card style="margin-top:20px"><h2>Ultimos pedidos</h2><table><thead><tr><th>ID</th><th>Producto</th><th>Total</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody id=tb></tbody></table></section>
-<script>const s=io();const uInput=document.getElementById("uInput");const puntos=document.getElementById("puntos");const promos=document.getElementById("promos");async function cargarPedidos(){const p=await(await fetch("/api/pedidos")).json();document.getElementById("tb").innerHTML=p.map(x=>"<tr><td>"+x.id+"</td><td>"+x.producto+"</td><td>"+x.total+"</td><td>"+x.usuario_username+"</td><td>"+(x.created_at||"")+"</td></tr>").join("")}
-async function cargarUsuario(){const username=uInput.value.trim();if(!username){puntos.textContent="";return null}const r=await fetch("/api/usuarios/"+encodeURIComponent(username));if(!r.ok){puntos.textContent="";return null}const j=await r.json();puntos.textContent="Puntos: "+j.puntos;return j}
-async function cargarPromos(){const r=await fetch("/api/promos");const lista=await r.json();promos.innerHTML=lista.length?lista.map(p=>"<div class='promo'><div><strong>"+p.descripcion+"</strong><div class=muted>Coste: "+p.coste_puntos+" puntos</div></div><button data-id='"+p.id+"'>Canjear</button></div>").join(""):"<p class=muted>No hay promociones.</p>";promos.querySelectorAll("button[data-id]").forEach(btn=>btn.onclick=()=>canjearPromo(btn.dataset.id))}
-async function canjearPromo(id){const username=uInput.value.trim();if(!username){alert("Introduce un usuario");return}const r=await fetch("/api/promos/"+id+"/redeem",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username})});const j=await r.json();if(!r.ok){alert(j.error||"No se pudo canjear la promo");return}await cargarUsuario();await cargarPromos();alert(j.message+". Puntos restantes: "+j.puntos)}
-document.getElementById("uBtn").onclick=cargarUsuario;uInput.addEventListener("change",cargarUsuario);document.getElementById("pf").onsubmit=async function(e){e.preventDefault();const f=new FormData(this);const username=String(f.get("username")||"").trim();const r=await fetch("/api/pedidos",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({producto:f.get("producto"),total:+f.get("total"),username})});if(!r.ok){const j=await r.json();alert(j.error||"No se pudo crear el pedido");return}this.reset();uInput.value=username;await cargarPedidos();await cargarPromos();await cargarUsuario()};s.on("nuevo-pedido",async()=>{await cargarPedidos();await cargarUsuario()});cargarUsuario();cargarPedidos();cargarPromos();</script>
+<section class="pos-card pos-history"><h2>Ultimos pedidos</h2><table><thead><tr><th>ID</th><th>Producto</th><th>Total</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody id=tb></tbody></table></section>
 </body></html>

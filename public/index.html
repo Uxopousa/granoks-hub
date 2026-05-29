@@ -1,16 +1,6 @@
-<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><title>Dashboard - Granoks</title><script src=https://cdn.socket.io/4.7.5/socket.io.min.js></script><script src=https://cdn.jsdelivr.net/npm/chart.js@4></script><style>body{font-family:sans-serif;max-width:1000px;margin:auto;padding:20px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.card{border:1px solid #ccc;border-radius:8px;padding:16px}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}</style></head><body>
+<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><title>Dashboard - Granoks</title><link rel=stylesheet href=/css/styles.css><script src=https://cdn.socket.io/4.7.5/socket.io.min.js></script><script src=https://cdn.jsdelivr.net/npm/chart.js@4></script><script defer src=/js/index.js></script></head><body class=dashboard-page>
 <h1>Dashboard Granoks-Hub</h1>
-<div class=row><a href=/pedidos.html>POS</a><span>|</span><label>Usuario:<input id=uInput value=cliente1 size=12><button id=uBtn>Cargar</button></label><span id=puntos></span></div>
-<div class=grid><div class=card><h2>Temperatura</h2><p id=temp>--</p><canvas id=tChart height=200></canvas></div><div class=card><h2>Nivel de grano</h2><p id=grano>--</p><canvas id=gChart height=200></canvas></div></div>
-<div class=card><h2>Ultimos pedidos</h2><div id=pedidos>Cargando...</div></div>
-<script>
-const s=io();
-const td=[],gd=[],tl=[];
-const tc=new Chart(document.getElementById("tChart"),{type:"line",data:{labels:tl,datasets:[{label:"Temperatura",data:td,borderColor:"orange",tension:0.3}]},options:{responsive:true,animation:false,scales:{x:{display:false}}}});
-const gc=new Chart(document.getElementById("gChart"),{type:"line",data:{labels:tl,datasets:[{label:"Nivel grano",data:gd,borderColor:"green",tension:0.3}]},options:{responsive:true,animation:false,scales:{x:{display:false}}}});
-s.on("sensores",d=>{document.getElementById("temp").textContent=d.temperatura+" C";document.getElementById("grano").textContent=d.nivelGrano+"%";if(td.length>20){td.shift();gd.shift();tl.shift()}td.push(d.temperatura);gd.push(d.nivelGrano);tl.push("");tc.update();gc.update()});
-async function cargarPuntos(){const u=document.getElementById("uInput").value.trim();if(!u)return;const r=await fetch("/api/usuarios/"+encodeURIComponent(u));if(!r.ok)return;const j=await r.json();document.getElementById("puntos").textContent="Puntos: "+j.puntos}
-document.getElementById("uBtn").onclick=cargarPuntos;cargarPuntos();
-s.on("nuevo-pedido",()=>{cargarPuntos();fetch("/api/pedidos").then(r=>r.json()).then(p=>document.getElementById("pedidos").innerHTML="<p>"+p.length+" pedidos</p>")});
-fetch("/api/pedidos").then(r=>r.json()).then(p=>document.getElementById("pedidos").innerHTML="<p>"+p.length+" pedidos</p>");
-</script></body></html>
+<div class="row dashboard-top"><a href=/pedidos.html>POS</a><span>|</span><label>Usuario:<input id=uInput value=cliente1 size=12><button id=uBtn>Cargar</button></label><span id=puntos></span></div>
+<div class=dashboard-grid><div class=dashboard-card><h2>Temperatura</h2><p id=temp>--</p><canvas id=tChart height=200></canvas></div><div class=dashboard-card><h2>Nivel de grano</h2><p id=grano>--</p><canvas id=gChart height=200></canvas></div></div>
+<div class=dashboard-history><h2>Ultimos pedidos</h2><div id=pedidos>Cargando...</div></div>
+</body></html>
