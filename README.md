@@ -1,6 +1,36 @@
 # Granoks-Hub Node
 
-Mini-ERP Coffee 4.0 migrado a Node.js.
+Mini-ERP Coffee 1.0 para cafeterías, pensado como proyecto de DAW: funcional, demostrable y fácil de seguir.
+
+## Qué hace ahora
+- Dashboard en tiempo real con sensores simulados de temperatura y nivel de grano.
+- Punto de venta para registrar pedidos.
+- Sistema de puntos por pedido (+50 puntos).
+- Canje de promociones con saldo de usuario.
+- Persistencia local con SQLite.
+- Tests básicos de rutas críticas.
+
+## Roadmap v1.0
+### Ya hecho
+- Dashboard en vivo.
+- POS operativo.
+- Sistema de puntos.
+- Promociones canjeables.
+- Validación básica de entradas.
+- Tests automáticos de API.
+
+### Siguiente mejora
+- Separar mejor el frontend en archivos CSS y JS propios.
+- Añadir historial detallado de pedidos por usuario.
+- Mejorar mensajes de error y feedback visual.
+- Añadir filtros y búsqueda en pedidos.
+- Preparar despliegue con variables de entorno.
+
+### Más adelante
+- Autenticación simple de usuarios.
+- Panel de administración.
+- Exportación de datos a CSV.
+- Métricas o gráficas más completas.
 
 ## Requisitos
 Node.js 18+
@@ -38,4 +68,7 @@ npm test
 
 ## Stack
 Express + Socket.io + better-sqlite3 + Chart.js CDN
+
+## Para reclutadores
+Este proyecto muestra una aplicación full stack pequeña pero completa: API REST, tiempo real, persistencia local, validación, tests y una interfaz sencilla. Está pensado para enseñar base técnica, orden y capacidad de cerrar un producto funcional.
 
