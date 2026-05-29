@@ -43,16 +43,23 @@ const canjearPromoTransaction = db.transaction(({ promo, username }) => {
 app.get("/api/pedidos", (q, r) => r.json(db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p ORDER BY p.id DESC").all()));
 app.post("/api/pedidos", (q, r) => {
   const p = q.body;
-  if (!p.producto || !p.total || !p.username) return r.status(400).json({ error: "Faltan datos" });
-  const { pedido, usuario } = crearPedidoTransaction({ producto: p.producto, total: p.total, username: p.username });
+  const producto = normalizarTexto(p.producto);
+  const username = normalizarTexto(p.username);
+  const total = normalizarTotal(p.total);
+  if (!producto || !username || !Number.isFinite(total) || total <= 0) {
+    return r.status(400).json({ error: "Datos de pedido invalidos" });
+  }
+  const { pedido, usuario } = crearPedidoTransaction({ producto, total, username });
   io.emit("nuevo-pedido", pedido);
   r.status(201).json({ pedido, puntos: usuario.puntos });
 });
 app.get("/api/promos", (q, r) => r.json(db.prepare("SELECT * FROM promo").all()));
 app.post("/api/promos/:id/redeem", (q, r) => {
   const username = (q.body.username || "").trim();
+  const promoId = Number(q.params.id);
   if (!username) return r.status(400).json({ error: "Username requerido" });
-  const promo = db.prepare("SELECT * FROM promo WHERE id = ?").get(q.params.id);
+  if (!Number.isInteger(promoId) || promoId <= 0) return r.status(400).json({ error: "Promo invalida" });
+  const promo = db.prepare("SELECT * FROM promo WHERE id = ?").get(promoId);
   if (!promo) return r.status(404).json({ error: "Promo no encontrada" });
   const user = db.prepare("SELECT * FROM usuario WHERE username = ?").get(username);
   if (!user) return r.status(404).json({ error: "Usuario no encontrado" });
