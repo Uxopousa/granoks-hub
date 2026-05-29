@@ -1,43 +1,58 @@
 # Granoks-Hub
 
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-Local-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black?logo=socket.io)](https://socket.io/)
+[![Tests](https://img.shields.io/badge/Tests-node%3Atest-success)](https://nodejs.org/api/test.html)
+
 Mini-ERP Coffee 1.0 para cafeterías.
 
+Plataforma web para centralizar pedidos, promociones y fidelización.
+Dashboard en tiempo real con datos simulados y punto de venta operativo.
+Base técnica sencilla, persistente y preparada para evolucionar por versiones.
+
+## Descripción
+Granoks-Hub es una aplicación web para cafeterías que centraliza pedidos, puntos de fidelización, promociones y un panel en tiempo real con datos simulados de sensores.
+
+La aplicación está planteada como un mini ERP ligero y demostrable, con una interfaz clara y un alcance cerrado para mostrar de forma ordenada funcionalidades clave en cafetería. La integración física con cafetera o tolva no forma parte de esta versión y se sustituye por simulación de datos.
+
+## Vista rápida
+| Campo | Valor |
+| --- | --- |
+| Versión | 1.0 |
+| Tipo | Mini ERP para cafeterías |
+| Tiempo real | Socket.IO |
+| Persistencia | SQLite |
+| Tests | Node.js `node:test` |
+| Frontend | HTML, CSS y JavaScript estáticos |
+| Sensorización | Simulada |
+
 ## Requisitos
-Node.js 18+
+| Requisito | Detalle |
+| --- | --- |
+| Node.js | 18 o superior |
 
-## Instalacion
-npm install
+## Instalación y ejecución
+| Paso | Comando |
+| --- | --- |
+| Instalar dependencias | `npm install` |
+| Ejecutar la app | `npm start` |
+| Ejecutar tests | `npm test` |
 
-## Ejecutar
-npm start
-
-## Tests
-npm test
-
-## Paginas
-- / - Dashboard con graficas y WebSocket
-- /pedidos.html - POS y canje promos
+## Páginas
+| Ruta | Descripción |
+| --- | --- |
+| `/` | Dashboard con gráficas y WebSocket |
+| `/pedidos.html` | POS y canje de promociones |
 
 ## API
-| GET /api/pedidos | Lista pedidos |
-| POST /api/pedidos | Crea pedido (+50 puntos) |
-| GET /api/promos | Lista promociones |
-| POST /api/promos/:id/redeem | Canjea promo |
-| GET /api/usuarios/:username | Consulta usuario |
-
-## Estructura
-- [server.js](server.js) - Punto de entrada que arranca el servidor
-- [src/granoks.js](src/granoks.js) - Fabrica del servidor y rutas API
-- [test/granoks.test.js](test/granoks.test.js) - Tests de rutas criticas
-- [public/](public) - Frontend estatico
-
-## Notas
-- La app usa SQLite local en `granoks.db`.
-- El puerto por defecto es `8080` si no se define `PORT`.
-- Se inicializan datos de ejemplo para `cliente1` y promos base en el arranque.
-
-## Stack
-Express + Socket.io + better-sqlite3 + Chart.js CDN
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/api/pedidos` | Lista pedidos |
+| POST | `/api/pedidos` | Crea pedido (+50 puntos) |
+| GET | `/api/promos` | Lista promociones |
+| POST | `/api/promos/:id/redeem` | Canjea promo |
+| GET | `/api/usuarios/:username` | Consulta usuario |
 
 ## Qué hace ahora
 - Dashboard en tiempo real con sensores simulados de temperatura y nivel de grano.
@@ -47,25 +62,46 @@ Express + Socket.io + better-sqlite3 + Chart.js CDN
 - Persistencia local con SQLite.
 - Tests básicos de rutas críticas.
 
-## Roadmap v1.0
-### Ya hecho
-- Dashboard en vivo.
-- POS operativo.
-- Sistema de puntos.
-- Promociones canjeables.
-- Validación básica de entradas.
-- Tests automáticos de API.
+## Estructura
+| Archivo | Función |
+| --- | --- |
+| [server.js](server.js) | Punto de entrada que arranca el servidor |
+| [src/granoks.js](src/granoks.js) | Fábrica del servidor y rutas API |
+| [test/granoks.test.js](test/granoks.test.js) | Tests de rutas críticas |
+| [public/](public) | Frontend estático |
 
-### Siguiente mejora
-- Separar mejor el frontend en archivos CSS y JS propios.
-- Añadir historial detallado de pedidos por usuario.
-- Mejorar mensajes de error y feedback visual.
-- Añadir filtros y búsqueda en pedidos.
-- Preparar despliegue con variables de entorno.
+## Notas
+| Punto | Detalle |
+| --- | --- |
+| Base de datos | SQLite local en `granoks.db` |
+| Puerto por defecto | `8080` si no se define `PORT` |
+| Datos iniciales | Se crean `cliente1` y promos base al arrancar |
+| Sensores | La comunicación con cafetera y tolva no está implementada; los datos se simulan para mostrar el comportamiento en tiempo real |
 
-### Más adelante
-- Autenticación simple de usuarios.
-- Panel de administración.
-- Exportación de datos a CSV.
-- Métricas o gráficas más completas.
+## Stack
+| Componente | Tecnología |
+| --- | --- |
+| Backend | Express |
+| Tiempo real | Socket.IO |
+| Base de datos | better-sqlite3 |
+| Gráficas | Chart.js CDN |
+
+## Alcance por versión
+| Versión | Incluye |
+| --- | --- |
+| v1.0 | Dashboard, POS, puntos, promociones, validación, SQLite y tests |
+| v1.1 | Historial de pedidos, filtros, stock básico, alertas y resumen de ventas |
+| v2.0 | Autenticación, roles, panel de administración, exportación CSV e informes avanzados |
+
+## Evolución prevista
+| Prioridad | Mejora |
+| --- | --- |
+| Alta | Introducir un ledger de negocio con trazabilidad de pedidos, puntos, promos y stock |
+| Alta | Añadir historial de pedidos por usuario y filtros de consulta |
+| Alta | Mejorar el frontend con componentes reutilizables, diseño responsive y una capa visual más cuidada |
+| Media | Gestión de stock y alertas de stock bajo |
+| Media | Preparar despliegue con variables de entorno |
+| Media | Mejorar mensajes de error y feedback visual |
+| Baja | Informes de ventas e ingresos más completos |
+| Baja | Autenticación, roles, panel de administración y exportación CSV |
 
