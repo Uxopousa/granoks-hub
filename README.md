@@ -105,3 +105,7 @@ La aplicación está planteada como un mini ERP ligero y demostrable, con una in
 | Baja | Informes de ventas e ingresos más completos |
 | Baja | Autenticación, roles, panel de administración y exportación CSV |
 
+---
+
+*Para agentes y contribuidores: ver [`AGENTS.md`](./AGENTS.md) — brief completo con reglas, arquitectura y preferencias del proyecto.*
+
