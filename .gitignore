@@ -47,3 +47,13 @@ Thumbs.db
 granoks.db
 granoks.db-shm
 granoks.db-wal
+
+# Developer / AI assistant local config
+.agents/
+AGENTS.md
+AGENTIC-BOOTSTRAP.md
+SECURITY.md
+.pre-commit-config.yaml
+DEVELOPER-PREFERENCES.md
+.docs/
+
