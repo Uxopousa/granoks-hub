@@ -1,0 +1,1 @@
+.dashboard-page{font-family:sans-serif;max-width:1000px;margin:auto;padding:20px}.dashboard-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.dashboard-card{border:1px solid #ccc;border-radius:8px;padding:16px}.dashboard-history{border:1px solid #ccc;border-radius:8px;padding:16px}
