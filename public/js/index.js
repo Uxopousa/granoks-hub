@@ -51,7 +51,13 @@ cargarPuntos();
 async function cargarPedidos() {
   const response = await fetch("/api/pedidos");
   const pedidos = await response.json();
-  document.getElementById("pedidos").innerHTML = "<p>" + pedidos.length + " pedidos</p>";
+  renderTable(pedidos, [
+    { key: "id", label: "ID" },
+    { key: "producto", label: "Producto" },
+    { key: "total", label: "Total" },
+    { key: "usuario_username", label: "Usuario" },
+    { key: "created_at", label: "Fecha" }
+  ], "pedidos");
 }
 
 socket.on("nuevo-pedido", async () => {

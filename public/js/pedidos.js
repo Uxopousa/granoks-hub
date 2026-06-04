@@ -7,7 +7,13 @@ const promos = document.getElementById("promos");
 async function cargarPedidos() {
   const response = await fetch("/api/pedidos");
   const pedidos = await response.json();
-  document.getElementById("tb").innerHTML = pedidos.map(pedido => "<tr><td>" + pedido.id + "</td><td>" + pedido.producto + "</td><td>" + pedido.total + "</td><td>" + pedido.usuario_username + "</td><td>" + (pedido.created_at || "") + "</td></tr>").join("");
+  renderTable(pedidos, [
+    { key: "id", label: "ID" },
+    { key: "producto", label: "Producto" },
+    { key: "total", label: "Total" },
+    { key: "usuario_username", label: "Usuario" },
+    { key: "created_at", label: "Fecha" }
+  ], "tb");
 }
 
 async function cargarUsuario() {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>POS - Granoks</title><link rel=stylesheet href=/css/styles.css><link rel=stylesheet href=/css/nav.css><link rel=stylesheet href=/css/pos.css><script src=https://cdn.socket.io/4.7.5/socket.io.min.js></script><script defer src=/js/nav.js></script><script defer src=/js/pedidos.js></script></head><body class=pos-page>
+<!DOCTYPE html><html lang=es><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>POS - Granoks</title><link rel=stylesheet href=/css/styles.css><link rel=stylesheet href=/css/nav.css><link rel=stylesheet href=/css/pos.css><script src=https://cdn.socket.io/4.7.5/socket.io.min.js></script><script defer src=/js/components/table.js></script><script defer src=/js/nav.js></script><script defer src=/js/pedidos.js></script></head><body class=pos-page>
 <div class=pos-main>
 <section class=pos-card>
 <h2>Crear pedido</h2>
@@ -8,5 +8,5 @@
 <h2>Promos disponibles</h2><p class=muted>Selecciona un usuario y canjea una promo con sus puntos.</p><div id=promos class=promos>Cargando...</div>
 </section>
 </div>
-<section class="pos-card pos-history"><h2>Ultimos pedidos</h2><table><thead><tr><th>ID</th><th>Producto</th><th>Total</th><th>Usuario</th><th>Fecha</th></tr></thead><tbody id=tb></tbody></table></section>
+<section class="pos-card pos-history"><h2>Ultimos pedidos</h2><div id=tb>Cargando...</div></section>
 </body></html>
