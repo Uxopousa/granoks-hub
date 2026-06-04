@@ -1,4 +1,4 @@
-injectNav("POS");
+injectNav();
 const socket = io();
 const uInput = document.getElementById("uInput");
 const puntos = document.getElementById("puntosDisplay");
@@ -76,7 +76,8 @@ uInput.addEventListener("change", cargarUsuario);
 document.getElementById("pf").onsubmit = async function(event) {
   event.preventDefault();
   const form = new FormData(this);
-  const username = String(form.get("username") || "").trim();
+  const username = uInput.value.trim();
+  if (!username) { showToast("Escribe un cliente primero", "error"); return; }
   const response = await fetch("/api/pedidos", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -90,7 +91,6 @@ document.getElementById("pf").onsubmit = async function(event) {
   }
 
   this.reset();
-  uInput.value = username;
   showToast("Pedido creado", "success");
   await cargarPedidos();
   await cargarPromos();

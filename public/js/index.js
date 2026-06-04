@@ -1,17 +1,17 @@
-injectNav("Dashboard");
+injectNav();
 const sensorLabels = [];
 const sensorTemperatures = [];
 const sensorGrains = [];
 
 const temperatureChart = new Chart(document.getElementById("tChart"), {
   type: "line",
-  data: { labels: sensorLabels, datasets: [{ label: "Temperatura", data: sensorTemperatures, borderColor: "orange", tension: 0.3 }] },
+  data: { labels: sensorLabels, datasets: [{ label: "Temperatura", data: sensorTemperatures, borderColor: "#c87a3e", backgroundColor: "rgba(200,122,62,0.1)", tension: 0.3 }] },
   options: { responsive: true, animation: false, scales: { x: { display: false } } }
 });
 
 const grainChart = new Chart(document.getElementById("gChart"), {
   type: "line",
-  data: { labels: sensorLabels, datasets: [{ label: "Nivel grano", data: sensorGrains, borderColor: "green", tension: 0.3 }] },
+  data: { labels: sensorLabels, datasets: [{ label: "Nivel grano", data: sensorGrains, borderColor: "#4a7c59", backgroundColor: "rgba(74,124,89,0.1)", tension: 0.3 }] },
   options: { responsive: true, animation: false, scales: { x: { display: false } } }
 });
 
@@ -33,20 +33,6 @@ socket.on("sensores", data => {
   temperatureChart.update();
   grainChart.update();
 });
-
-async function cargarPuntos() {
-  const username = document.getElementById("uInput").value.trim();
-  if (!username) return;
-
-  const response = await fetch("/api/usuarios/" + encodeURIComponent(username));
-  if (!response.ok) return;
-
-  const user = await response.json();
-  getPuntosEl().textContent = "Puntos: " + user.puntos;
-}
-
-document.getElementById("uBtn").onclick = cargarPuntos;
-cargarPuntos();
 
 async function cargarResumen() {
   const response = await fetch("/api/pedidos/resumen");
@@ -70,7 +56,6 @@ async function cargarPedidos() {
 }
 
 socket.on("nuevo-pedido", async () => {
-  await cargarPuntos();
   await cargarResumen();
   await cargarPedidos();
 });
