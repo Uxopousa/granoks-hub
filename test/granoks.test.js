@@ -11,26 +11,29 @@ async function startTestServer() {
   const dbPath = path.join(tempDir, "test.db");
   const instance = createGranoksServer({ dbPath });
 
-  await new Promise(resolve => instance.server.listen(0, resolve));
+  await new Promise((resolve) => instance.server.listen(0, resolve));
 
   return {
     baseUrl: `http://127.0.0.1:${instance.server.address().port}`,
     async close() {
       await instance.close();
       fs.rmSync(tempDir, { recursive: true, force: true });
-    }
+    },
   };
+}
+
+async function fetchJson(url, options) {
+  const res = await fetch(url, options);
+  const data = await res.json();
+  return { status: res.status, data };
 }
 
 test("GET /api/promos retorna promos sembradas", async () => {
   const server = await startTestServer();
-
   try {
-    const response = await fetch(`${server.baseUrl}/api/promos`);
-    assert.equal(response.status, 200);
-
-    const promos = await response.json();
-    assert.equal(promos.length, 3);
+    const { status, data } = await fetchJson(`${server.baseUrl}/api/promos`);
+    assert.equal(status, 200);
+    assert.equal(data.length, 3);
   } finally {
     await server.close();
   }
@@ -38,18 +41,14 @@ test("GET /api/promos retorna promos sembradas", async () => {
 
 test("POST /api/pedidos rechaza datos invalidos", async () => {
   const server = await startTestServer();
-
   try {
-    const response = await fetch(`${server.baseUrl}/api/pedidos`, {
+    const { status, data } = await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "", total: 0, username: "" })
+      body: JSON.stringify({ producto: "", total: 0, username: "" }),
     });
-
-    assert.equal(response.status, 400);
-
-    const payload = await response.json();
-    assert.equal(payload.error, "Datos de pedido invalidos");
+    assert.equal(status, 400);
+    assert.equal(data.error, "Datos de pedido invalidos");
   } finally {
     await server.close();
   }
@@ -57,27 +56,117 @@ test("POST /api/pedidos rechaza datos invalidos", async () => {
 
 test("crear pedido suma puntos y permite canjear promo", async () => {
   const server = await startTestServer();
-
   try {
-    const createResponse = await fetch(`${server.baseUrl}/api/pedidos`, {
+    const created = await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Americano", total: 3.5, username: "tester" })
+      body: JSON.stringify({ producto: "Americano", total: 3.5, username: "tester" }),
     });
+    assert.equal(created.status, 201);
+    assert.equal(created.data.puntos, 50);
 
-    assert.equal(createResponse.status, 201);
-    const created = await createResponse.json();
-    assert.equal(created.puntos, 50);
-
-    const redeemResponse = await fetch(`${server.baseUrl}/api/promos/1/redeem`, {
+    const redeemed = await fetchJson(`${server.baseUrl}/api/promos/1/redeem`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "tester" })
+      body: JSON.stringify({ username: "tester" }),
+    });
+    assert.equal(redeemed.status, 200);
+    assert.equal(redeemed.data.puntos, 0);
+  } finally {
+    await server.close();
+  }
+});
+
+test("crear pedido registra movimientos en ledger", async () => {
+  const server = await startTestServer();
+  try {
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Latte", total: 4.5, username: "ledger-test" }),
     });
 
-    assert.equal(redeemResponse.status, 200);
-    const redeemed = await redeemResponse.json();
-    assert.equal(redeemed.puntos, 0);
+    const { status, data } = await fetchJson(`${server.baseUrl}/api/movimientos?usuario=ledger-test`);
+    assert.equal(status, 200);
+    assert.ok(data.length >= 2);
+
+    const tipos = data.map((m) => m.tipo);
+    assert.ok(tipos.includes("pedido_creado"));
+    assert.ok(tipos.includes("puntos_sumados"));
+  } finally {
+    await server.close();
+  }
+});
+
+test("canje de promo registra movimiento", async () => {
+  const server = await startTestServer();
+  try {
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Capuchino", total: 3.0, username: "canje-test" }),
+    });
+
+    await fetchJson(`${server.baseUrl}/api/promos/1/redeem`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "canje-test" }),
+    });
+
+    const { data } = await fetchJson(`${server.baseUrl}/api/movimientos?usuario=canje-test`);
+    const tipos = data.map((m) => m.tipo);
+    assert.ok(tipos.includes("promo_canjeada"));
+    assert.ok(tipos.includes("puntos_restados"));
+  } finally {
+    await server.close();
+  }
+});
+
+test("GET /api/pedidos filtra por usuario", async () => {
+  const server = await startTestServer();
+  try {
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Te", total: 2.0, username: "filtro-a" }),
+    });
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Cafe", total: 2.5, username: "filtro-b" }),
+    });
+
+    const { data } = await fetchJson(`${server.baseUrl}/api/pedidos?usuario=filtro-a`);
+    assert.equal(data.length, 1);
+    assert.equal(data[0].producto, "Te");
+  } finally {
+    await server.close();
+  }
+});
+
+test("GET /api/pedidos filtra por rango de fechas", async () => {
+  const server = await startTestServer();
+  try {
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Expresso", total: 2.0, username: "rango-test" }),
+    });
+
+    const hoy = new Date().toISOString().slice(0, 10);
+    const { data } = await fetchJson(`${server.baseUrl}/api/pedidos?desde=${hoy}&hasta=${hoy}`);
+    assert.ok(data.length >= 1);
+  } finally {
+    await server.close();
+  }
+});
+
+test("GET /api/movimientos sin usuario retorna todo", async () => {
+  const server = await startTestServer();
+  try {
+    const { status, data } = await fetchJson(`${server.baseUrl}/api/movimientos`);
+    assert.equal(status, 200);
+    assert.ok(Array.isArray(data));
   } finally {
     await server.close();
   }
