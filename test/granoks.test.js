@@ -77,6 +77,34 @@ test("crear pedido suma puntos y permite canjear promo", async () => {
   }
 });
 
+test("GET /api/pedidos/resumen retorna totales correctos", async () => {
+  const server = await startTestServer();
+  try {
+    const vacio = await fetchJson(`${server.baseUrl}/api/pedidos/resumen`);
+    assert.equal(vacio.status, 200);
+    assert.equal(vacio.data.total_pedidos, 0);
+    assert.equal(vacio.data.total_ingresos, 0);
+
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Latte", total: 4.0, username: "sum-test" }),
+    });
+    await fetchJson(`${server.baseUrl}/api/pedidos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ producto: "Te", total: 2.0, username: "sum-test" }),
+    });
+
+    const { data } = await fetchJson(`${server.baseUrl}/api/pedidos/resumen`);
+    assert.equal(data.total_pedidos, 2);
+    assert.equal(data.total_ingresos, 6);
+    assert.equal(data.promedio_pedido, 3);
+  } finally {
+    await server.close();
+  }
+});
+
 test("crear pedido registra movimientos en ledger", async () => {
   const server = await startTestServer();
   try {

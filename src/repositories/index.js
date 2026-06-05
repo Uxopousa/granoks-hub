@@ -17,6 +17,10 @@ const pedido = {
   crear(db, { producto, total, usuario_username }) {
     const result = db.prepare("INSERT INTO pedido (producto, total, usuario_username) VALUES (?, ?, ?)").run(producto, total, usuario_username);
     return { id: result.lastInsertRowid };
+  },
+
+  resumen(db) {
+    return db.prepare("SELECT COUNT(*) AS total_pedidos, COALESCE(SUM(total), 0) AS total_ingresos, COALESCE(AVG(total), 0) AS promedio_pedido FROM pedido").get();
   }
 };
 

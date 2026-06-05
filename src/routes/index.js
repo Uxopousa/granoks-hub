@@ -11,6 +11,10 @@ function createRoutes({ db, repos, services, io }) {
   const { Router } = require("express");
   const router = Router();
 
+  router.get("/api/pedidos/resumen", (req, res) => {
+    res.json(repos.pedido.resumen(db));
+  });
+
   router.get("/api/pedidos", (req, res) => {
     const filtros = {};
     if (req.query.usuario) filtros.usuario = normalizarTexto(req.query.usuario);

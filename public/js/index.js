@@ -48,6 +48,15 @@ async function cargarPuntos() {
 document.getElementById("uBtn").onclick = cargarPuntos;
 cargarPuntos();
 
+async function cargarResumen() {
+  const response = await fetch("/api/pedidos/resumen");
+  const r = await response.json();
+  document.getElementById("resumen").innerHTML =
+    '<div class=resumen-item><div class=resumen-valor>' + r.total_pedidos + '</div><div class=resumen-label>Pedidos</div></div>' +
+    '<div class=resumen-item><div class=resumen-valor>$' + Number(r.total_ingresos).toFixed(2) + '</div><div class=resumen-label>Ingresos</div></div>' +
+    '<div class=resumen-item><div class=resumen-valor>$' + Number(r.promedio_pedido).toFixed(2) + '</div><div class=resumen-label>Promedio</div></div>';
+}
+
 async function cargarPedidos() {
   const response = await fetch("/api/pedidos");
   const pedidos = await response.json();
@@ -62,7 +71,9 @@ async function cargarPedidos() {
 
 socket.on("nuevo-pedido", async () => {
   await cargarPuntos();
+  await cargarResumen();
   await cargarPedidos();
 });
 
+cargarResumen();
 cargarPedidos();
