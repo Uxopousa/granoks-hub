@@ -49,7 +49,7 @@ async function cargarPromos() {
 async function canjearPromo(id) {
   const username = uInput.value.trim();
   if (!username) {
-    alert("Introduce un usuario");
+    showToast("Introduce un usuario", "error");
     return;
   }
 
@@ -61,13 +61,13 @@ async function canjearPromo(id) {
   const result = await response.json();
 
   if (!response.ok) {
-    alert(result.error || "No se pudo canjear la promo");
+    showToast(result.error || "No se pudo canjear la promo", "error");
     return;
   }
 
   await cargarUsuario();
   await cargarPromos();
-  alert(result.message + ". Puntos restantes: " + result.puntos);
+  showToast(result.message + ". Puntos restantes: " + result.puntos, "success");
 }
 
 document.getElementById("uBtn").onclick = cargarUsuario;
@@ -85,12 +85,13 @@ document.getElementById("pf").onsubmit = async function(event) {
 
   if (!response.ok) {
     const result = await response.json();
-    alert(result.error || "No se pudo crear el pedido");
+    showToast(result.error || "No se pudo crear el pedido", "error");
     return;
   }
 
   this.reset();
   uInput.value = username;
+  showToast("Pedido creado", "success");
   await cargarPedidos();
   await cargarPromos();
   await cargarUsuario();
