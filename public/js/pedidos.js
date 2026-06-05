@@ -1,6 +1,7 @@
+injectNav("POS");
 const socket = io();
 const uInput = document.getElementById("uInput");
-const puntos = document.getElementById("puntos");
+const puntos = document.getElementById("puntosDisplay");
 const promos = document.getElementById("promos");
 
 async function cargarPedidos() {

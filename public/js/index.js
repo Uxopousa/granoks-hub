@@ -1,3 +1,4 @@
+injectNav("Dashboard");
 const sensorLabels = [];
 const sensorTemperatures = [];
 const sensorGrains = [];
@@ -41,7 +42,7 @@ async function cargarPuntos() {
   if (!response.ok) return;
 
   const user = await response.json();
-  document.getElementById("puntos").textContent = "Puntos: " + user.puntos;
+  getPuntosEl().textContent = "Puntos: " + user.puntos;
 }
 
 document.getElementById("uBtn").onclick = cargarPuntos;
