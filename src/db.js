@@ -31,6 +31,16 @@ function createDatabase(dbPath) {
       referencia_tipo TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS categoria (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL UNIQUE
+    );
+    CREATE TABLE IF NOT EXISTS producto (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL,
+      precio REAL NOT NULL,
+      categoria_id INTEGER NOT NULL REFERENCES categoria(id)
+    );
   `);
 
   const promoCount = db.prepare("SELECT COUNT(*) c FROM promo").get().c;
@@ -44,6 +54,28 @@ function createDatabase(dbPath) {
   const userCount = db.prepare("SELECT COUNT(*) c FROM usuario").get().c;
   if (userCount === 0) {
     db.prepare("INSERT INTO usuario (username, puntos) VALUES (?,?)").run("cliente1", 0);
+  }
+
+  const catCount = db.prepare("SELECT COUNT(*) c FROM categoria").get().c;
+  if (catCount === 0) {
+    var insC = db.prepare("INSERT INTO categoria (nombre) VALUES (?)");
+    insC.run("Cafes");
+    insC.run("Bebidas Frias");
+    insC.run("Pasteleria");
+    var insP = db.prepare("INSERT INTO producto (nombre, precio, categoria_id) VALUES (?,?,?)");
+    insP.run("Espresso", 2.50, 1);
+    insP.run("Americano", 3.00, 1);
+    insP.run("Latte", 3.50, 1);
+    insP.run("Cappuccino", 3.50, 1);
+    insP.run("Mocaccino", 4.00, 1);
+    insP.run("Iced Latte", 3.50, 2);
+    insP.run("Frappuccino", 4.50, 2);
+    insP.run("Smoothie", 5.00, 2);
+    insP.run("Limonada", 2.50, 2);
+    insP.run("Croissant", 3.00, 3);
+    insP.run("Muffin", 3.50, 3);
+    insP.run("Cookie", 2.00, 3);
+    insP.run("Brownie", 3.50, 3);
   }
 
   return db;

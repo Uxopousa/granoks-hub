@@ -39,6 +39,16 @@ function createRoutes({ db, repos, services, io }) {
     res.status(201).json({ pedido, puntos: usuario.puntos });
   });
 
+  router.get("/api/categorias", (req, res) => {
+    res.json(repos.categoria.listar(db));
+  });
+
+  router.get("/api/productos", (req, res) => {
+    const filtros = {};
+    if (req.query.categoria_id) filtros.categoria_id = Number(req.query.categoria_id);
+    res.json(repos.producto.listar(db, filtros));
+  });
+
   router.get("/api/promos", (req, res) => {
     res.json(repos.promo.listar(db));
   });

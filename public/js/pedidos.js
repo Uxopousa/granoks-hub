@@ -1,10 +1,53 @@
 injectNav();
 var lookupTimer;
+var catActual = null;
 
 var socket = io();
 var uInput = document.getElementById("uInput");
 var puntos = document.getElementById("puntosDisplay");
 var promos = document.getElementById("promos");
+var pInput = document.querySelector('[name=producto]');
+var tInput = document.querySelector('[name=total]');
+
+async function cargarCategorias() {
+  var res = await fetch("/api/categorias");
+  var cats = await res.json();
+  var html = '<button class=cat-tab data-id="">Todo</button>';
+  for (var i = 0; i < cats.length; i++) {
+    html += '<button class=cat-tab data-id="' + cats[i].id + '">' + cats[i].nombre + "</button>";
+  }
+  document.getElementById("catTabs").innerHTML = html;
+  document.getElementById("catTabs").addEventListener("click", function (e) {
+    var btn = e.target.closest(".cat-tab");
+    if (!btn) return;
+    document.querySelectorAll(".cat-tab").forEach(function (t) { t.classList.remove("active"); });
+    btn.classList.add("active");
+    catActual = btn.dataset.id || null;
+    cargarProductos(catActual);
+  });
+  document.querySelector('.cat-tab[data-id=""]').classList.add("active");
+}
+
+async function cargarProductos(categoriaId) {
+  var url = "/api/productos";
+  if (categoriaId) url += "?categoria_id=" + categoriaId;
+  var res = await fetch(url);
+  var prods = await res.json();
+  var html = "";
+  for (var i = 0; i < prods.length; i++) {
+    var p = prods[i];
+    html += '<button class=prod-btn data-nombre="' + p.nombre + '" data-precio="' + p.precio + '">' +
+      '<span class=prod-nombre>' + p.nombre + "</span>" +
+      '<span class=prod-precio>\u20AC' + p.precio.toFixed(2) + "</span></button>";
+  }
+  document.getElementById("prodGrid").innerHTML = html;
+  document.getElementById("prodGrid").addEventListener("click", function (e) {
+    var btn = e.target.closest(".prod-btn");
+    if (!btn) return;
+    pInput.value = btn.dataset.nombre;
+    tInput.value = btn.dataset.precio;
+  });
+}
 
 async function cargarPedidos() {
   var response = await fetch("/api/pedidos");
@@ -112,5 +155,7 @@ socket.on("nuevo-pedido", async function () {
   await cargarUsuario();
 });
 
+cargarCategorias();
+cargarProductos(null);
 cargarPedidos();
 cargarPromos();

@@ -39,8 +39,8 @@ async function cargarResumen() {
   const r = await response.json();
   document.getElementById("resumen").innerHTML =
     '<div class=resumen-item><div class=resumen-valor>' + r.total_pedidos + '</div><div class=resumen-label>Pedidos</div></div>' +
-    '<div class=resumen-item><div class=resumen-valor>$' + Number(r.total_ingresos).toFixed(2) + '</div><div class=resumen-label>Ingresos</div></div>' +
-    '<div class=resumen-item><div class=resumen-valor>$' + Number(r.promedio_pedido).toFixed(2) + '</div><div class=resumen-label>Promedio</div></div>';
+    '<div class=resumen-item><div class=resumen-valor>\u20AC' + Number(r.total_ingresos).toFixed(2) + '</div><div class=resumen-label>Ingresos</div></div>' +
+    '<div class=resumen-item><div class=resumen-valor>\u20AC' + Number(r.promedio_pedido).toFixed(2) + '</div><div class=resumen-label>Promedio</div></div>';
 }
 
 async function cargarPedidos() {

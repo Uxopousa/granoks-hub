@@ -53,6 +53,19 @@ const promo = {
   obtenerPorId(db, id) { return db.prepare("SELECT * FROM promo WHERE id = ?").get(id); }
 };
 
+const categoria = {
+  listar(db) { return db.prepare("SELECT * FROM categoria ORDER BY id").all(); }
+};
+
+const producto = {
+  listar(db, filtros) {
+    if (filtros && filtros.categoria_id) {
+      return db.prepare("SELECT * FROM producto WHERE categoria_id = ? ORDER BY id").all(filtros.categoria_id);
+    }
+    return db.prepare("SELECT * FROM producto ORDER BY categoria_id, id").all();
+  }
+};
+
 const movimiento = {
   registrar(db, { tipo, detalle, usuario_username, referencia_id, referencia_tipo }) {
     db.prepare("INSERT INTO movimiento (tipo, detalle, usuario_username, referencia_id, referencia_tipo) VALUES (?, ?, ?, ?, ?)")
@@ -69,4 +82,4 @@ const movimiento = {
   }
 };
 
-module.exports = { pedido, usuario, promo, movimiento };
+module.exports = { pedido, usuario, promo, movimiento, categoria, producto };
