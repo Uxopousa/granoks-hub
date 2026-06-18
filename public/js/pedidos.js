@@ -6,8 +6,7 @@ var socket = io();
 var uInput = document.getElementById("uInput");
 var puntos = document.getElementById("puntosDisplay");
 var promos = document.getElementById("promos");
-var pInput = document.querySelector('[name=producto]');
-var tInput = document.querySelector('[name=total]');
+var items = [];
 
 async function cargarCategorias() {
   var res = await fetch("/api/categorias");
@@ -44,8 +43,8 @@ async function cargarProductos(categoriaId) {
   document.getElementById("prodGrid").addEventListener("click", function (e) {
     var btn = e.target.closest(".prod-btn");
     if (!btn) return;
-    pInput.value = btn.dataset.nombre;
-    tInput.value = btn.dataset.precio;
+    items.push({ producto: btn.dataset.nombre, precio: +btn.dataset.precio });
+    renderItemsList();
   });
 }
 
@@ -122,17 +121,36 @@ async function canjearPromo(id) {
   showToast("Promo canjeada. Saldo: " + result.puntos, "success");
 }
 
+function renderItemsList() {
+  var total = 0;
+  var html = "";
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    total += it.precio;
+    html += '<div class=item-row><span class=item-nombre>' + it.producto + '</span><span class=item-precio>\u20AC' + it.precio.toFixed(2) + '</span><button type=button class=item-remove data-idx="' + i + '">&times;</button></div>';
+  }
+  document.getElementById("itemsList").innerHTML = html;
+  document.getElementById("totalDisplay").textContent = "\u20AC" + total.toFixed(2);
+  var btns = document.querySelectorAll(".item-remove");
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].onclick = function () {
+      items.splice(+this.dataset.idx, 1);
+      renderItemsList();
+    };
+  }
+}
+
 uInput.addEventListener("input", lookupDebounced);
 
 document.getElementById("pf").onsubmit = async function (event) {
   event.preventDefault();
-  var form = new FormData(this);
   var username = uInput.value.trim();
   if (!username) { showToast("Escribe un cliente", "error"); return; }
+  if (items.length === 0) { showToast("Agrega productos al pedido", "error"); return; }
   var response = await fetch("/api/pedidos", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ producto: form.get("producto"), total: +form.get("total"), username: username })
+    body: JSON.stringify({ items: items, username: username })
   });
 
   if (!response.ok) {
@@ -142,7 +160,8 @@ document.getElementById("pf").onsubmit = async function (event) {
   }
 
   var data = await response.json();
-  this.reset();
+  items = [];
+  renderItemsList();
   uInput.value = username;
   showToast("Pedido creado. " + username + ": " + data.puntos + " pts", "success");
   await cargarPedidos();

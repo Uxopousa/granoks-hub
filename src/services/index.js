@@ -1,14 +1,24 @@
 function createServices(db, repos) {
   return {
-    crearPedidoConPuntos({ producto, total, username }) {
+    crearPedidoConPuntos({ items, username }) {
       const transaction = db.transaction(() => {
         repos.usuario.crearSiNoExiste(db, username);
+        var total = 0;
+        var nombres = [];
+        for (var i = 0; i < items.length; i++) {
+          total += items[i].precio;
+          nombres.push(items[i].producto);
+        }
+        var producto = nombres.join(" + ");
         const pedidoResult = repos.pedido.crear(db, { producto, total, usuario_username: username });
+        for (var j = 0; j < items.length; j++) {
+          repos.pedidoItem.crear(db, { pedido_id: pedidoResult.id, producto_nombre: items[j].producto, precio: items[j].precio });
+        }
         const user = repos.usuario.sumarPuntos(db, { username, puntos: 50 });
 
         repos.movimiento.registrar(db, {
           tipo: "pedido_creado",
-          detalle: `${producto} - $${total}`,
+          detalle: `${producto} - €${total}`,
           usuario_username: username,
           referencia_id: pedidoResult.id,
           referencia_tipo: "pedido"

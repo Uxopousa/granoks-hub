@@ -1,3 +1,13 @@
+const getItemsStmt = null;
+
+function attachItems(db, pedidos) {
+  var s = db.prepare("SELECT * FROM pedido_item WHERE pedido_id = ?");
+  for (var i = 0; i < pedidos.length; i++) {
+    pedidos[i].items = s.all(pedidos[i].id);
+  }
+  return pedidos;
+}
+
 const pedido = {
   listar(db, filtros = {}) {
     let sql = "SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE 1=1";
@@ -7,11 +17,13 @@ const pedido = {
     if (filtros.hasta) { sql += " AND p.created_at < date(?, '+1 day')"; params.push(filtros.hasta); }
     sql += " ORDER BY p.id DESC";
     if (filtros.limite) { sql += " LIMIT ?"; params.push(filtros.limite); }
-    return db.prepare(sql).all(...params);
+    return attachItems(db, db.prepare(sql).all(...params));
   },
 
   obtenerPorId(db, id) {
-    return db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE p.id = ?").get(id);
+    var p = db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE p.id = ?").get(id);
+    if (p) p.items = db.prepare("SELECT * FROM pedido_item WHERE pedido_id = ?").all(id);
+    return p;
   },
 
   crear(db, { producto, total, usuario_username }) {
@@ -21,6 +33,12 @@ const pedido = {
 
   resumen(db) {
     return db.prepare("SELECT COUNT(*) AS total_pedidos, COALESCE(SUM(total), 0) AS total_ingresos, COALESCE(AVG(total), 0) AS promedio_pedido FROM pedido").get();
+  }
+};
+
+const pedidoItem = {
+  crear(db, { pedido_id, producto_nombre, precio }) {
+    db.prepare("INSERT INTO pedido_item (pedido_id, producto_nombre, precio) VALUES (?, ?, ?)").run(pedido_id, producto_nombre, precio);
   }
 };
 
@@ -82,4 +100,4 @@ const movimiento = {
   }
 };
 
-module.exports = { pedido, usuario, promo, movimiento, categoria, producto };
+module.exports = { pedido, pedidoItem, usuario, promo, movimiento, categoria, producto };

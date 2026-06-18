@@ -26,15 +26,28 @@ function createRoutes({ db, repos, services, io }) {
 
   router.post("/api/pedidos", (req, res) => {
     const body = req.body;
-    const producto = normalizarTexto(body.producto);
     const username = normalizarTexto(body.username);
-    const total = normalizarTotal(body.total);
+    var items = body.items;
 
-    if (!producto || !username || !Number.isFinite(total) || total <= 0) {
-      return res.status(400).json({ error: "Datos de pedido invalidos" });
+    if (!username) {
+      return res.status(400).json({ error: "Username requerido" });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Items del pedido requeridos" });
     }
 
-    const { pedido, usuario } = services.crearPedidoConPuntos({ producto, total, username });
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var nombre = normalizarTexto(item.producto);
+      var precio = normalizarTotal(item.precio);
+      if (!nombre || !Number.isFinite(precio) || precio <= 0) {
+        return res.status(400).json({ error: "Item invalido: " + JSON.stringify(item) });
+      }
+      item.producto = nombre;
+      item.precio = precio;
+    }
+
+    const { pedido, usuario } = services.crearPedidoConPuntos({ items, username });
     io.emit("nuevo-pedido", pedido);
     res.status(201).json({ pedido, puntos: usuario.puntos });
   });

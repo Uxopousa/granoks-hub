@@ -8,6 +8,13 @@
 .prod-btn:active { background: #fbf7f3; }
 .prod-nombre { font-size: 0.82em; font-weight: 600; color: var(--text); }
 .prod-precio { font-size: 0.78em; color: var(--text-secondary); margin-top: 2px; }
+#itemsList { margin-bottom: 12px; }
+.item-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--bg); border-radius: var(--radius); margin-bottom: 4px; }
+.item-nombre { flex: 1; font-size: 0.88em; }
+.item-precio { font-weight: 600; color: var(--primary); font-size: 0.88em; }
+.item-remove { background: none; border: none; color: #c0392b; font-size: 1.2em; cursor: pointer; padding: 0 4px; line-height: 1; }
+.total-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; margin-bottom: 12px; border-top: 1px solid var(--border); }
+.total-val { font-size: 1.2em; font-weight: 700; color: var(--primary); }
 .cliente-row { display: flex; align-items: center; gap: 8px; }
 .cliente-row input { flex: 1; }
 .puntos-badge { font-weight: 600; color: var(--accent); font-size: 0.9em; white-space: nowrap; min-width: 30px; text-align: right; }

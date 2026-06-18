@@ -41,6 +41,12 @@ function createDatabase(dbPath) {
       precio REAL NOT NULL,
       categoria_id INTEGER NOT NULL REFERENCES categoria(id)
     );
+    CREATE TABLE IF NOT EXISTS pedido_item (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pedido_id INTEGER NOT NULL REFERENCES pedido(id),
+      producto_nombre TEXT NOT NULL,
+      precio REAL NOT NULL
+    );
   `);
 
   const promoCount = db.prepare("SELECT COUNT(*) c FROM promo").get().c;

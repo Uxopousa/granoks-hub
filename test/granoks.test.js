@@ -45,10 +45,10 @@ test("POST /api/pedidos rechaza datos invalidos", async () => {
     const { status, data } = await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "", total: 0, username: "" }),
+      body: JSON.stringify({ items: [], username: "" }),
     });
     assert.equal(status, 400);
-    assert.equal(data.error, "Datos de pedido invalidos");
+    assert.equal(data.error, "Username requerido");
   } finally {
     await server.close();
   }
@@ -60,7 +60,7 @@ test("crear pedido suma puntos y permite canjear promo", async () => {
     const created = await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Americano", total: 3.5, username: "tester" }),
+      body: JSON.stringify({ items: [{ producto: "Americano", precio: 3.5 }], username: "tester" }),
     });
     assert.equal(created.status, 201);
     assert.equal(created.data.puntos, 50);
@@ -88,12 +88,12 @@ test("GET /api/pedidos/resumen retorna totales correctos", async () => {
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Latte", total: 4.0, username: "sum-test" }),
+      body: JSON.stringify({ items: [{ producto: "Latte", precio: 4.0 }], username: "sum-test" }),
     });
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Te", total: 2.0, username: "sum-test" }),
+      body: JSON.stringify({ items: [{ producto: "Te", precio: 2.0 }], username: "sum-test" }),
     });
 
     const { data } = await fetchJson(`${server.baseUrl}/api/pedidos/resumen`);
@@ -111,7 +111,7 @@ test("crear pedido registra movimientos en ledger", async () => {
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Latte", total: 4.5, username: "ledger-test" }),
+      body: JSON.stringify({ items: [{ producto: "Latte", precio: 4.5 }], username: "ledger-test" }),
     });
 
     const { status, data } = await fetchJson(`${server.baseUrl}/api/movimientos?usuario=ledger-test`);
@@ -132,7 +132,7 @@ test("canje de promo registra movimiento", async () => {
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Capuchino", total: 3.0, username: "canje-test" }),
+      body: JSON.stringify({ items: [{ producto: "Capuchino", precio: 3.0 }], username: "canje-test" }),
     });
 
     await fetchJson(`${server.baseUrl}/api/promos/1/redeem`, {
@@ -156,12 +156,12 @@ test("GET /api/pedidos filtra por usuario", async () => {
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Te", total: 2.0, username: "filtro-a" }),
+      body: JSON.stringify({ items: [{ producto: "Te", precio: 2.0 }], username: "filtro-a" }),
     });
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Cafe", total: 2.5, username: "filtro-b" }),
+      body: JSON.stringify({ items: [{ producto: "Cafe", precio: 2.5 }], username: "filtro-b" }),
     });
 
     const { data } = await fetchJson(`${server.baseUrl}/api/pedidos?usuario=filtro-a`);
@@ -178,7 +178,7 @@ test("GET /api/pedidos filtra por rango de fechas", async () => {
     await fetchJson(`${server.baseUrl}/api/pedidos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ producto: "Expresso", total: 2.0, username: "rango-test" }),
+      body: JSON.stringify({ items: [{ producto: "Expresso", precio: 2.0 }], username: "rango-test" }),
     });
 
     const hoy = new Date().toISOString().slice(0, 10);
