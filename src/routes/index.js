@@ -27,7 +27,7 @@ function createRoutes({ db, repos, services, io }) {
   router.post("/api/pedidos", (req, res) => {
     const body = req.body;
     const username = normalizarTexto(body.username);
-    var items = body.items;
+    const items = body.items;
 
     if (!username) {
       return res.status(400).json({ error: "Username requerido" });
@@ -36,11 +36,11 @@ function createRoutes({ db, repos, services, io }) {
       return res.status(400).json({ error: "Items del pedido requeridos" });
     }
 
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      var nombre = normalizarTexto(item.producto);
-      var precio = normalizarTotal(item.precio);
-      var cant = Number(item.cantidad);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const nombre = normalizarTexto(item.producto);
+      const precio = normalizarTotal(item.precio);
+      const cant = Number(item.cantidad);
       if (!nombre || !Number.isFinite(precio) || precio <= 0) {
         return res.status(400).json({ error: "Item invalido: " + JSON.stringify(item) });
       }

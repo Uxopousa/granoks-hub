@@ -37,10 +37,26 @@ socket.on("sensores", data => {
 async function cargarResumen() {
   const response = await fetch("/api/pedidos/resumen");
   const r = await response.json();
-  document.getElementById("resumen").innerHTML =
-    '<div class=resumen-item><div class=resumen-valor>' + r.total_pedidos + '</div><div class=resumen-label>Pedidos</div></div>' +
-    '<div class=resumen-item><div class=resumen-valor>\u20AC' + Number(r.total_ingresos).toFixed(2) + '</div><div class=resumen-label>Ingresos</div></div>' +
-    '<div class=resumen-item><div class=resumen-valor>\u20AC' + Number(r.promedio_pedido).toFixed(2) + '</div><div class=resumen-label>Promedio</div></div>';
+  const container = document.getElementById("resumen");
+  container.textContent = "";
+  const items = [
+    { valor: r.total_pedidos, label: "Pedidos" },
+    { valor: "\u20AC" + Number(r.total_ingresos).toFixed(2), label: "Ingresos" },
+    { valor: "\u20AC" + Number(r.promedio_pedido).toFixed(2), label: "Promedio" },
+  ];
+  for (const item of items) {
+    const div = document.createElement("div");
+    div.className = "resumen-item";
+    const valor = document.createElement("div");
+    valor.className = "resumen-valor";
+    valor.textContent = item.valor;
+    const label = document.createElement("div");
+    label.className = "resumen-label";
+    label.textContent = item.label;
+    div.appendChild(valor);
+    div.appendChild(label);
+    container.appendChild(div);
+  }
 }
 
 async function cargarPedidos() {

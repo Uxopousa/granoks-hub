@@ -7,6 +7,7 @@ const { createDatabase } = require("./db");
 const repos = require("./repositories");
 const { createServices } = require("./services");
 const { createRoutes } = require("./routes");
+const { createSensorService } = require("./services/sensores");
 
 function createGranoksServer(options = {}) {
   const dbPath = options.dbPath || path.join(__dirname, "..", "granoks.db");
@@ -16,7 +17,6 @@ function createGranoksServer(options = {}) {
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server, { pingInterval: 10000, pingTimeout: 5000 });
-  const sensorTimer = setInterval(simularSensores, 2000);
 
   app.use(express.json({ limit: "50kb" }));
   app.use(express.static(path.join(__dirname, "..", "public")));
@@ -28,16 +28,10 @@ function createGranoksServer(options = {}) {
     socket.on("disconnect", () => console.log("Desconectado:", socket.id));
   });
 
-  function simularSensores() {
-    io.emit("sensores", {
-      temperatura: +(70 + Math.random() * 10).toFixed(1),
-      nivelGrano: +(Math.random() * 100).toFixed(1),
-      timestamp: Date.now(),
-    });
-  }
+  const sensorService = createSensorService(io);
 
   async function close() {
-    clearInterval(sensorTimer);
+    sensorService.stop();
     io.close();
     await new Promise((resolve) => server.close(resolve));
     db.close();

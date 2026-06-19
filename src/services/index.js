@@ -3,17 +3,17 @@ function createServices(db, repos) {
     crearPedidoConPuntos({ items, username }) {
       const transaction = db.transaction(() => {
         repos.usuario.crearSiNoExiste(db, username);
-        var total = 0;
-        var nombres = [];
-        for (var i = 0; i < items.length; i++) {
-          var it = items[i];
-          var cant = it.cantidad || 1;
+        let total = 0;
+        const nombres = [];
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          const cant = it.cantidad || 1;
           total += it.precio * cant;
           nombres.push(cant > 1 ? it.producto + " x" + cant : it.producto);
         }
-        var producto = nombres.join(" + ");
+        const producto = nombres.join(" + ");
         const pedidoResult = repos.pedido.crear(db, { producto, total, usuario_username: username });
-        for (var j = 0; j < items.length; j++) {
+        for (let j = 0; j < items.length; j++) {
           repos.pedidoItem.crear(db, { pedido_id: pedidoResult.id, producto_nombre: items[j].producto, precio: items[j].precio, cantidad: items[j].cantidad });
         }
         const user = repos.usuario.sumarPuntos(db, { username, puntos: 50 });

@@ -49,7 +49,11 @@ function createDatabase(dbPath) {
       cantidad INTEGER NOT NULL DEFAULT 1
     );
   `);
-  try { db.exec("ALTER TABLE pedido_item ADD COLUMN cantidad INTEGER NOT NULL DEFAULT 1"); } catch (e) {}
+  const colInfo = db.prepare("PRAGMA table_info(pedido_item)").all();
+  const hasCantidad = colInfo.some(c => c.name === "cantidad");
+  if (!hasCantidad) {
+    db.exec("ALTER TABLE pedido_item ADD COLUMN cantidad INTEGER NOT NULL DEFAULT 1");
+  }
 
   const promoCount = db.prepare("SELECT COUNT(*) c FROM promo").get().c;
   if (promoCount === 0) {
@@ -66,11 +70,11 @@ function createDatabase(dbPath) {
 
   const catCount = db.prepare("SELECT COUNT(*) c FROM categoria").get().c;
   if (catCount === 0) {
-    var insC = db.prepare("INSERT INTO categoria (nombre) VALUES (?)");
+    const insC = db.prepare("INSERT INTO categoria (nombre) VALUES (?)");
     insC.run("Cafes");
     insC.run("Bebidas Frias");
     insC.run("Pasteleria");
-    var insP = db.prepare("INSERT INTO producto (nombre, precio, categoria_id) VALUES (?,?,?)");
+    const insP = db.prepare("INSERT INTO producto (nombre, precio, categoria_id) VALUES (?,?,?)");
     insP.run("Espresso", 2.50, 1);
     insP.run("Americano", 3.00, 1);
     insP.run("Latte", 3.50, 1);

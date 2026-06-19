@@ -1,8 +1,6 @@
-const getItemsStmt = null;
-
 function attachItems(db, pedidos) {
-  var s = db.prepare("SELECT * FROM pedido_item WHERE pedido_id = ?");
-  for (var i = 0; i < pedidos.length; i++) {
+  const s = db.prepare("SELECT * FROM pedido_item WHERE pedido_id = ?");
+  for (let i = 0; i < pedidos.length; i++) {
     pedidos[i].items = s.all(pedidos[i].id);
   }
   return pedidos;
@@ -21,7 +19,7 @@ const pedido = {
   },
 
   obtenerPorId(db, id) {
-    var p = db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE p.id = ?").get(id);
+    const p = db.prepare("SELECT p.id, p.producto, p.total, p.usuario_username, p.created_at FROM pedido p WHERE p.id = ?").get(id);
     if (p) p.items = db.prepare("SELECT * FROM pedido_item WHERE pedido_id = ?").all(id);
     return p;
   },
