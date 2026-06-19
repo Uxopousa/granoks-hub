@@ -1,110 +1,168 @@
 # Granoks-Hub
 
+**Mini-ERP para cafeterías** — dashboard en tiempo real, punto de venta con catálogo dinámico, fidelización de clientes y promociones.
+
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![SQLite](https://img.shields.io/badge/SQLite-Local-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black?logo=socket.io)](https://socket.io/)
-[![Tests](https://img.shields.io/badge/Tests-node%3Atest-success)](https://nodejs.org/api/test.html)
+[![Express](https://img.shields.io/badge/Express-4.x-000?logo=express)](https://expressjs.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite)](https://github.com/WiseLibs/better-sqlite3)
+[![Socket.IO](https://img.shields.io/badge/Realtime-Socket.IO-25c2a0?logo=socket.io)](https://socket.io/)
+[![Tests](https://img.shields.io/badge/Tests-node%3Atest-5a5)](https://nodejs.org/api/test.html)
 
-Mini-ERP ligero para cafeterías — dashboard en tiempo real, punto de venta con catálogo, múltiples items por pedido, puntos de fidelización y promociones.
+---
 
-## Descripción
+## Features
 
-Aplicación web que centraliza pedidos, fidelización y promociones. Backend Express 3-capas con SQLite, frontend HTML/CSS/JS vanilla. Datos simulados de sensores en dashboard.
+- **Dashboard operativo** — sensores simulados (temperatura, nivel de grano), gráfico histórico, KPIs de ventas y feed de pedidos en vivo vía WebSocket.
+- **Punto de venta** — catálogo organizado por categorías con grid visual, selección múltiple con cantidad, auto-lookup de cliente con saldo de puntos.
+- **Fidelización** — acumulación automática de puntos por pedido, canje por promociones, ledger completo de movimientos.
+- **API REST** — endpoints para pedidos, productos, promociones, usuarios y movimientos con filtros.
+- **Arquitectura limpia** — backend organizado en 3 capas (routes / services / repositories) sobre Express.
+- **UI responsiva** — paleta cafetera, navegación adaptable a móvil, componentes reutilizables (tabla, toasts).
 
-## Vista rápida
-
-| Campo | Valor |
-| --- | --- |
-| Tipo | Mini ERP cafetería |
-| Arquitectura | 3-Tier (routes / services / repositories) |
-| Tiempo real | Socket.IO |
-| Persistencia | SQLite (better-sqlite3) |
-| Tests | Node.js `node:test` |
-| Frontend | HTML, CSS, JS estáticos |
-| Sensorización | Simulada |
-
-## Requisitos
-
-| Requisito | Detalle |
-| --- | --- |
-| Node.js | 18 o superior |
-
-## Instalación y ejecución
-
-| Paso | Comando |
-| --- | --- |
-| Instalar | `npm install` |
-| Ejecutar | `npm start` |
-| Tests | `npm test` |
-
-## Páginas
-
-| Ruta | Descripción |
-| --- | --- |
-| `/` | Dashboard con sensores, gráficos y resumen de ventas |
-| `/pedidos.html` | POS con catálogo por categorías y canje de promos |
-
-## API
-
-| Método | Ruta | Descripción |
-| --- | --- | --- |
-| GET | `/api/pedidos` | Lista pedidos (filtro: usuario, desde, hasta, limite) |
-| POST | `/api/pedidos` | Crea pedido con items array (+50 puntos) |
-| GET | `/api/pedidos/resumen` | KPIs: total pedidos, ingresos, promedio |
-| GET | `/api/categorias` | Lista categorías de producto |
-| GET | `/api/productos` | Lista productos (filtro: categoria_id) |
-| GET | `/api/promos` | Lista promociones |
-| POST | `/api/promos/:id/redeem` | Canjea promo por puntos |
-| GET | `/api/usuarios/:username` | Consulta usuario y saldo puntos |
-| GET | `/api/movimientos` | Ledger de movimientos (filtro: usuario, limite) |
-
-## Funcionalidades
-
-- **Dashboard**: sensores simulados (temp, nivel grano), gráfico histórico, KPI cards (pedidos, ingresos, ticket promedio), últimos pedidos en vivo vía WebSocket.
-- **POS**: grid de productos con pestañas por categoría, selección múltiple con cantidad (+/-), auto-lookup de cliente, puntos acumulados, canje de promociones.
-- **Fidelización**: +50 puntos por pedido, canje por promociones, ledger completo de movimientos.
-- **UI**: paleta cafetera (espresso, crema, ámbar, matcha), diseño responsive, nav edge-to-edge, toasts, tabla reutilizable.
-
-## Estructura
-
-| Archivo | Función |
-| --- | --- |
-| `server.js` | Entrypoint |
-| `src/granoks.js` | Fábrica del servidor |
-| `src/db.js` | Schema + seed |
-| `src/routes/` | Capa presentación (rutas Express) |
-| `src/services/` | Capa negocio (transacciones) |
-| `src/repositories/` | Capa datos (queries SQLite) |
-| `test/granoks.test.js` | Tests node:test |
-| `public/` | Frontend estático |
-| `public/js/components/` | Componentes reutilizables (table, toast) |
+---
 
 ## Stack
 
-| Componente | Tecnología |
-| --- | --- |
-| Backend | Express 3-Tier |
+| Capa | Tecnología |
+|---|---|
+| Backend | Express 4.x (3-Tier) |
+| Base de datos | SQLite via better-sqlite3 |
 | Tiempo real | Socket.IO |
-| Base de datos | better-sqlite3 |
-| Gráficas | Chart.js CDN |
+| Frontend | HTML, CSS, JavaScript (vanilla) |
+| Gráficos | Chart.js (CDN) |
 
-## Notas
+---
 
-| Punto | Detalle |
-| --- | --- |
-| Base de datos | SQLite local en `granoks.db` |
-| Puerto | `8080` por defecto (`PORT` para cambiar) |
-| Datos iniciales | 3 categorías, 13 productos, 3 promos, 1 usuario seed |
-| Sensores | Simulados (sin integración física) |
+## Quick start
+
+```bash
+npm install
+npm start        # http://localhost:8080
+npm test         # 9 tests, node:test
+```
+
+Variables de entorno:
+
+| Variable | Default | Descripción |
+|---|---|---|
+| `PORT` | `8080` | Puerto del servidor |
+
+---
+
+## API
+
+### Pedidos
+
+```http
+GET /api/pedidos?usuario=&desde=&hasta=&limite=
+POST /api/pedidos
+GET /api/pedidos/resumen
+```
+
+`POST /api/pedidos` crea un pedido con múltiples items y otorga +50 puntos al cliente:
+
+```json
+{
+  "items": [
+    { "producto": "Latte", "precio": 3.50, "cantidad": 2 },
+    { "producto": "Croissant", "precio": 3.00, "cantidad": 1 }
+  ],
+  "username": "cliente1"
+}
+```
+
+### Catálogo
+
+```http
+GET /api/categorias
+GET /api/productos?categoria_id=
+```
+
+### Promociones
+
+```http
+GET /api/promos
+POST /api/promos/:id/redeem    # body: { "username": "..." }
+```
+
+### Usuarios
+
+```http
+GET /api/usuarios/:username
+```
+
+### Movimientos (ledger)
+
+```http
+GET /api/movimientos?usuario=&limite=
+```
+
+---
+
+## Estructura del proyecto
+
+```
+├── server.js                  # Entrypoint
+├── src/
+│   ├── granoks.js             # Fábrica del servidor
+│   ├── db.js                  # Schema SQLite + seed data
+│   ├── routes/                # Capa de presentación (Express)
+│   ├── services/              # Capa de negocio (transacciones)
+│   └── repositories/          # Capa de datos (queries)
+├── public/                    # Frontend estático
+│   ├── index.html             # Dashboard
+│   ├── pedidos.html           # POS
+│   ├── css/                   # Estilos (styles, nav, pos, dashboard)
+│   └── js/                    # Lógica frontend + componentes (table, toast)
+├── test/
+│   └── granoks.test.js        # Tests (node:test)
+├── granoks.db                 # SQLite local (gitignored)
+└── package.json
+```
+
+---
+
+## Seed data
+
+Al arrancar por primera vez, la aplicación crea automáticamente:
+
+- **3 categorías**: Cafés, Bebidas Frías, Pastelería
+- **13 productos**: espresso, americano, latte, cappuccino, mocaccino, iced latte, frappuccino, smoothie, limonada, croissant, muffin, cookie, brownie
+- **3 promociones**: café gratis (50 pts), descuento 20% (100 pts), taza personalizada (200 pts)
+- **1 usuario de prueba**: `cliente1` (0 puntos iniciales)
+
+---
+
+## Tests
+
+```bash
+npm test
+```
+
+Suite de 9 tests que cubren:
+
+- Creación de pedidos con validación
+- Acumulación y canje de puntos
+- Cálculo de resumen de ventas (KPIs)
+- Ledger de movimientos (pedido + canje)
+- Filtros por usuario y rango de fechas
+
+---
 
 ## Roadmap
 
-| Versión | Estado |
-| --- | --- |
-| Base POS + dashboard + puntos | ✅ |
-| Catálogo productos por categorías | ✅ |
-| Múltiples items por pedido con cantidad | ✅ |
-| Ledger de movimientos | ✅ |
-| Simulación pedidos + alertas stock | Pendiente |
-| Autenticación / roles | Futuro |
-| Exportación CSV / informes | Futuro |
+- [x] Dashboard con sensores simulados y KPIs
+- [x] POS con catálogo y selección múltiple
+- [x] Fidelización con puntos y promociones
+- [x] Ledger de trazabilidad (movimientos)
+- [ ] Simulación de pedidos automáticos
+- [ ] Alertas de stock bajo
+- [ ] Autenticación y roles
+- [ ] Exportación CSV
+- [ ] Panel de administración
+
+---
+
+## Licencia
+
+MIT
