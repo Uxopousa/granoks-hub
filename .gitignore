@@ -48,7 +48,7 @@ granoks.db
 granoks.db-shm
 granoks.db-wal
 
-# Developer / AI assistant local config
+# Local dev config
 .agents/
 AGENTS.md
 AGENTIC-BOOTSTRAP.md
