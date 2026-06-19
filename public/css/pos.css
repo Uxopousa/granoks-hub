@@ -1,9 +1,6 @@
-.client-card { margin-bottom: 20px; }
-.client-label { display: block; font-size: 0.82em; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-.client-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.client-row input { flex: 1; min-width: 180px; }
-.client-btn { flex-shrink: 0; }
-#puntosDisplay { font-weight: 600; color: var(--accent); font-size: 0.95em; margin-left: 4px; }
+.cliente-row { display: flex; align-items: center; gap: 8px; }
+.cliente-row input { flex: 1; }
+.puntos-badge { font-weight: 600; color: var(--accent); font-size: 0.9em; white-space: nowrap; min-width: 30px; text-align: right; }
 .pos-main { display: grid; grid-template-columns: 1fr; gap: 20px; }
 @media(min-width:768px) { .pos-main { grid-template-columns: 1fr 1fr; gap: 24px; } }
 .pos-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }

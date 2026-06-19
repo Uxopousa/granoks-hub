@@ -1,12 +1,14 @@
 injectNav();
-const socket = io();
-const uInput = document.getElementById("uInput");
-const puntos = document.getElementById("puntosDisplay");
-const promos = document.getElementById("promos");
+var lookupTimer;
+
+var socket = io();
+var uInput = document.getElementById("uInput");
+var puntos = document.getElementById("puntosDisplay");
+var promos = document.getElementById("promos");
 
 async function cargarPedidos() {
-  const response = await fetch("/api/pedidos");
-  const pedidos = await response.json();
+  var response = await fetch("/api/pedidos");
+  var pedidos = await response.json();
   renderTable(pedidos, [
     { key: "id", label: "ID" },
     { key: "producto", label: "Producto" },
@@ -17,91 +19,98 @@ async function cargarPedidos() {
 }
 
 async function cargarUsuario() {
-  const username = uInput.value.trim();
+  var username = uInput.value.trim();
   if (!username) {
     puntos.textContent = "";
     return null;
   }
 
-  const response = await fetch("/api/usuarios/" + encodeURIComponent(username));
+  var response = await fetch("/api/usuarios/" + encodeURIComponent(username));
   if (!response.ok) {
     puntos.textContent = "";
     return null;
   }
 
-  const user = await response.json();
-  puntos.textContent = "Puntos: " + user.puntos;
+  var user = await response.json();
+  puntos.textContent = user.puntos;
   return user;
 }
 
+function lookupDebounced() {
+  clearTimeout(lookupTimer);
+  lookupTimer = setTimeout(cargarUsuario, 250);
+}
+
 async function cargarPromos() {
-  const response = await fetch("/api/promos");
-  const lista = await response.json();
+  var response = await fetch("/api/promos");
+  var lista = await response.json();
   promos.innerHTML = lista.length
-    ? lista.map(promo => "<div class='promo'><div><strong>" + promo.descripcion + "</strong><div class=muted>Coste: " + promo.coste_puntos + " puntos</div></div><button data-id='" + promo.id + "'>Canjear</button></div>").join("")
+    ? lista.map(function (p) {
+        return "<div class='promo'><div><strong>" + p.descripcion + "</strong><div class=muted>" + p.coste_puntos + "</div></div><button data-id='" + p.id + "'>Canjear</button></div>";
+      }).join("")
     : "<p class=muted>No hay promociones.</p>";
 
-  promos.querySelectorAll("button[data-id]").forEach(button => {
-    button.onclick = () => canjearPromo(button.dataset.id);
+  promos.querySelectorAll("button[data-id]").forEach(function (btn) {
+    btn.onclick = function () { canjearPromo(btn.dataset.id); };
   });
 }
 
 async function canjearPromo(id) {
-  const username = uInput.value.trim();
+  var username = uInput.value.trim();
   if (!username) {
-    showToast("Introduce un usuario", "error");
+    showToast("Escribe un cliente", "error");
     return;
   }
 
-  const response = await fetch("/api/promos/" + id + "/redeem", {
+  var response = await fetch("/api/promos/" + id + "/redeem", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username })
+    body: JSON.stringify({ username: username })
   });
-  const result = await response.json();
+  var result = await response.json();
 
   if (!response.ok) {
-    showToast(result.error || "No se pudo canjear la promo", "error");
+    showToast(result.error || "No se pudo canjear", "error");
     return;
   }
 
   await cargarUsuario();
   await cargarPromos();
-  showToast(result.message + ". Puntos restantes: " + result.puntos, "success");
+  showToast("Promo canjeada. Saldo: " + result.puntos, "success");
 }
 
-document.getElementById("uBtn").onclick = cargarUsuario;
-uInput.addEventListener("change", cargarUsuario);
+uInput.addEventListener("input", lookupDebounced);
 
-document.getElementById("pf").onsubmit = async function(event) {
+document.getElementById("pf").onsubmit = async function (event) {
   event.preventDefault();
-  const form = new FormData(this);
-  const username = uInput.value.trim();
-  if (!username) { showToast("Escribe un cliente primero", "error"); return; }
-  const response = await fetch("/api/pedidos", {
+  var form = new FormData(this);
+  var username = uInput.value.trim();
+  if (!username) { showToast("Escribe un cliente", "error"); return; }
+  var response = await fetch("/api/pedidos", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ producto: form.get("producto"), total: +form.get("total"), username })
+    body: JSON.stringify({ producto: form.get("producto"), total: +form.get("total"), username: username })
   });
 
   if (!response.ok) {
-    const result = await response.json();
-    showToast(result.error || "No se pudo crear el pedido", "error");
+    var result = await response.json();
+    showToast(result.error || "No se pudo crear", "error");
     return;
   }
 
+  var data = await response.json();
   this.reset();
-  showToast("Pedido creado", "success");
+  uInput.value = username;
+  showToast("Pedido creado. " + username + ": " + data.puntos + " pts", "success");
   await cargarPedidos();
   await cargarPromos();
   await cargarUsuario();
 };
 
-socket.on("nuevo-pedido", async () => {
+socket.on("nuevo-pedido", async function () {
   await cargarPedidos();
   await cargarUsuario();
 });
 
-cargarUsuario();
 cargarPedidos();
 cargarPromos();
