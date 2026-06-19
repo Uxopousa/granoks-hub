@@ -5,107 +5,106 @@
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-Realtime-black?logo=socket.io)](https://socket.io/)
 [![Tests](https://img.shields.io/badge/Tests-node%3Atest-success)](https://nodejs.org/api/test.html)
 
-Mini-ERP Coffee 1.0 para cafeterías.
-
-Plataforma web para centralizar pedidos, promociones y fidelización.
-Dashboard en tiempo real con datos simulados y punto de venta operativo.
-Base técnica sencilla, persistente y preparada para evolucionar por versiones.
+Mini-ERP ligero para cafeterías — dashboard en tiempo real, punto de venta con catálogo, múltiples items por pedido, puntos de fidelización y promociones.
 
 ## Descripción
-Granoks-Hub es una aplicación web para cafeterías que centraliza pedidos, puntos de fidelización, promociones y un panel en tiempo real con datos simulados de sensores.
 
-La aplicación está planteada como un mini ERP ligero y demostrable, con una interfaz clara y un alcance cerrado para mostrar de forma ordenada funcionalidades clave en cafetería. La integración física con cafetera o tolva no forma parte de esta versión y se sustituye por simulación de datos.
+Aplicación web que centraliza pedidos, fidelización y promociones. Backend Express 3-capas con SQLite, frontend HTML/CSS/JS vanilla. Datos simulados de sensores en dashboard.
 
 ## Vista rápida
+
 | Campo | Valor |
 | --- | --- |
-| Versión | 1.0 |
-| Tipo | Mini ERP para cafeterías |
+| Tipo | Mini ERP cafetería |
+| Arquitectura | 3-Tier (routes / services / repositories) |
 | Tiempo real | Socket.IO |
-| Persistencia | SQLite |
+| Persistencia | SQLite (better-sqlite3) |
 | Tests | Node.js `node:test` |
-| Frontend | HTML, CSS y JavaScript estáticos |
+| Frontend | HTML, CSS, JS estáticos |
 | Sensorización | Simulada |
 
 ## Requisitos
+
 | Requisito | Detalle |
 | --- | --- |
 | Node.js | 18 o superior |
 
 ## Instalación y ejecución
+
 | Paso | Comando |
 | --- | --- |
-| Instalar dependencias | `npm install` |
-| Ejecutar la app | `npm start` |
-| Ejecutar tests | `npm test` |
+| Instalar | `npm install` |
+| Ejecutar | `npm start` |
+| Tests | `npm test` |
 
 ## Páginas
+
 | Ruta | Descripción |
 | --- | --- |
-| `/` | Dashboard con gráficas y WebSocket |
-| `/pedidos.html` | POS y canje de promociones |
+| `/` | Dashboard con sensores, gráficos y resumen de ventas |
+| `/pedidos.html` | POS con catálogo por categorías y canje de promos |
 
 ## API
+
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| GET | `/api/pedidos` | Lista pedidos |
-| POST | `/api/pedidos` | Crea pedido (+50 puntos) |
+| GET | `/api/pedidos` | Lista pedidos (filtro: usuario, desde, hasta, limite) |
+| POST | `/api/pedidos` | Crea pedido con items array (+50 puntos) |
+| GET | `/api/pedidos/resumen` | KPIs: total pedidos, ingresos, promedio |
+| GET | `/api/categorias` | Lista categorías de producto |
+| GET | `/api/productos` | Lista productos (filtro: categoria_id) |
 | GET | `/api/promos` | Lista promociones |
-| POST | `/api/promos/:id/redeem` | Canjea promo |
-| GET | `/api/usuarios/:username` | Consulta usuario |
+| POST | `/api/promos/:id/redeem` | Canjea promo por puntos |
+| GET | `/api/usuarios/:username` | Consulta usuario y saldo puntos |
+| GET | `/api/movimientos` | Ledger de movimientos (filtro: usuario, limite) |
 
-## Qué hace ahora
-- Dashboard en tiempo real con sensores simulados de temperatura y nivel de grano.
-- Punto de venta para registrar pedidos.
-- Sistema de puntos por pedido (+50 puntos).
-- Canje de promociones con saldo de usuario.
-- Persistencia local con SQLite.
-- Tests básicos de rutas críticas.
+## Funcionalidades
+
+- **Dashboard**: sensores simulados (temp, nivel grano), gráfico histórico, KPI cards (pedidos, ingresos, ticket promedio), últimos pedidos en vivo vía WebSocket.
+- **POS**: grid de productos con pestañas por categoría, selección múltiple con cantidad (+/-), auto-lookup de cliente, puntos acumulados, canje de promociones.
+- **Fidelización**: +50 puntos por pedido, canje por promociones, ledger completo de movimientos.
+- **UI**: paleta cafetera (espresso, crema, ámbar, matcha), diseño responsive, nav edge-to-edge, toasts, tabla reutilizable.
 
 ## Estructura
+
 | Archivo | Función |
 | --- | --- |
-| [server.js](server.js) | Punto de entrada que arranca el servidor |
-| [src/granoks.js](src/granoks.js) | Fábrica del servidor y rutas API |
-| [test/granoks.test.js](test/granoks.test.js) | Tests de rutas críticas |
-| [public/](public) | Frontend estático |
-
-## Notas
-| Punto | Detalle |
-| --- | --- |
-| Base de datos | SQLite local en `granoks.db` |
-| Puerto por defecto | `8080` si no se define `PORT` |
-| Datos iniciales | Se crean `cliente1` y promos base al arrancar |
-| Sensores | La comunicación con cafetera y tolva no está implementada; los datos se simulan para mostrar el comportamiento en tiempo real |
+| `server.js` | Entrypoint |
+| `src/granoks.js` | Fábrica del servidor |
+| `src/db.js` | Schema + seed |
+| `src/routes/` | Capa presentación (rutas Express) |
+| `src/services/` | Capa negocio (transacciones) |
+| `src/repositories/` | Capa datos (queries SQLite) |
+| `test/granoks.test.js` | Tests node:test |
+| `public/` | Frontend estático |
+| `public/js/components/` | Componentes reutilizables (table, toast) |
 
 ## Stack
+
 | Componente | Tecnología |
 | --- | --- |
-| Backend | Express |
+| Backend | Express 3-Tier |
 | Tiempo real | Socket.IO |
 | Base de datos | better-sqlite3 |
 | Gráficas | Chart.js CDN |
 
-## Alcance por versión
-| Versión | Incluye |
+## Notas
+
+| Punto | Detalle |
 | --- | --- |
-| v1.0 | Dashboard, POS, puntos, promociones, validación, SQLite y tests |
-| v1.1 | Historial de pedidos, filtros, stock básico, alertas y resumen de ventas |
-| v2.0 | Autenticación, roles, panel de administración, exportación CSV e informes avanzados |
+| Base de datos | SQLite local en `granoks.db` |
+| Puerto | `8080` por defecto (`PORT` para cambiar) |
+| Datos iniciales | 3 categorías, 13 productos, 3 promos, 1 usuario seed |
+| Sensores | Simulados (sin integración física) |
 
-## Evolución prevista
-| Prioridad | Mejora |
+## Roadmap
+
+| Versión | Estado |
 | --- | --- |
-| Alta | Introducir un ledger de negocio con trazabilidad de pedidos, puntos, promos y stock |
-| Alta | Añadir historial de pedidos por usuario y filtros de consulta |
-| Alta | Mejorar el frontend con componentes reutilizables, diseño responsive y una capa visual más cuidada |
-| Media | Gestión de stock y alertas de stock bajo |
-| Media | Preparar despliegue con variables de entorno |
-| Media | Mejorar mensajes de error y feedback visual |
-| Baja | Informes de ventas e ingresos más completos |
-| Baja | Autenticación, roles, panel de administración y exportación CSV |
-
----
-
-*Para agentes y contribuidores: ver [`AGENTS.md`](./AGENTS.md) — brief completo con reglas, arquitectura y preferencias del proyecto.*
-
+| Base POS + dashboard + puntos | ✅ |
+| Catálogo productos por categorías | ✅ |
+| Múltiples items por pedido con cantidad | ✅ |
+| Ledger de movimientos | ✅ |
+| Simulación pedidos + alertas stock | Pendiente |
+| Autenticación / roles | Futuro |
+| Exportación CSV / informes | Futuro |
