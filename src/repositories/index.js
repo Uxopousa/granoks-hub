@@ -37,8 +37,8 @@ const pedido = {
 };
 
 const pedidoItem = {
-  crear(db, { pedido_id, producto_nombre, precio }) {
-    db.prepare("INSERT INTO pedido_item (pedido_id, producto_nombre, precio) VALUES (?, ?, ?)").run(pedido_id, producto_nombre, precio);
+  crear(db, { pedido_id, producto_nombre, precio, cantidad }) {
+    db.prepare("INSERT INTO pedido_item (pedido_id, producto_nombre, precio, cantidad) VALUES (?, ?, ?, ?)").run(pedido_id, producto_nombre, precio, cantidad || 1);
   }
 };
 

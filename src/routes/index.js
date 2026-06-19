@@ -40,11 +40,13 @@ function createRoutes({ db, repos, services, io }) {
       var item = items[i];
       var nombre = normalizarTexto(item.producto);
       var precio = normalizarTotal(item.precio);
+      var cant = Number(item.cantidad);
       if (!nombre || !Number.isFinite(precio) || precio <= 0) {
         return res.status(400).json({ error: "Item invalido: " + JSON.stringify(item) });
       }
       item.producto = nombre;
       item.precio = precio;
+      item.cantidad = Number.isInteger(cant) && cant > 0 ? cant : 1;
     }
 
     const { pedido, usuario } = services.crearPedidoConPuntos({ items, username });

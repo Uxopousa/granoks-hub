@@ -43,9 +43,43 @@ async function cargarProductos(categoriaId) {
   document.getElementById("prodGrid").addEventListener("click", function (e) {
     var btn = e.target.closest(".prod-btn");
     if (!btn) return;
-    items.push({ producto: btn.dataset.nombre, precio: +btn.dataset.precio });
+    var nombre = btn.dataset.nombre;
+    var existente = null;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].producto === nombre) { existente = items[i]; break; }
+    }
+    if (existente) {
+      existente.cantidad++;
+    } else {
+      items.push({ producto: nombre, precio: +btn.dataset.precio, cantidad: 1 });
+    }
     renderItemsList();
   });
+}
+
+function refreshGridSelection() {
+  var btns = document.querySelectorAll(".prod-btn");
+  for (var i = 0; i < btns.length; i++) {
+    var btn = btns[i];
+    var nombre = btn.dataset.nombre;
+    var match = null;
+    for (var j = 0; j < items.length; j++) {
+      if (items[j].producto === nombre) { match = items[j]; break; }
+    }
+    var badge = btn.querySelector(".prod-badge");
+    if (match) {
+      btn.classList.add("selected");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "prod-badge";
+        btn.appendChild(badge);
+      }
+      badge.textContent = match.cantidad;
+    } else {
+      btn.classList.remove("selected");
+      if (badge) badge.remove();
+    }
+  }
 }
 
 async function cargarPedidos() {
@@ -126,18 +160,39 @@ function renderItemsList() {
   var html = "";
   for (var i = 0; i < items.length; i++) {
     var it = items[i];
-    total += it.precio;
-    html += '<div class=item-row><span class=item-nombre>' + it.producto + '</span><span class=item-precio>\u20AC' + it.precio.toFixed(2) + '</span><button type=button class=item-remove data-idx="' + i + '">&times;</button></div>';
+    var lineTotal = it.precio * it.cantidad;
+    total += lineTotal;
+    html += '<div class=item-row>' +
+      '<button type=button class=item-qty data-idx="' + i + '" data-dir="-1">&minus;</button>' +
+      '<span class=item-qty-val>' + it.cantidad + '</span>' +
+      '<button type=button class=item-qty data-idx="' + i + '" data-dir="1">+</button>' +
+      '<span class=item-nombre>' + it.producto + '</span>' +
+      '<span class=item-precio>\u20AC' + lineTotal.toFixed(2) + '</span>' +
+      '<button type=button class=item-remove data-idx="' + i + '">&times;</button></div>';
   }
   document.getElementById("itemsList").innerHTML = html;
   document.getElementById("totalDisplay").textContent = "\u20AC" + total.toFixed(2);
-  var btns = document.querySelectorAll(".item-remove");
-  for (var j = 0; j < btns.length; j++) {
-    btns[j].onclick = function () {
+
+  var qtyBtns = document.querySelectorAll(".item-qty");
+  for (var j = 0; j < qtyBtns.length; j++) {
+    qtyBtns[j].onclick = function () {
+      var idx = +this.dataset.idx;
+      var dir = +this.dataset.dir;
+      items[idx].cantidad += dir;
+      if (items[idx].cantidad <= 0) items.splice(idx, 1);
+      renderItemsList();
+    };
+  }
+
+  var rmBtns = document.querySelectorAll(".item-remove");
+  for (var k = 0; k < rmBtns.length; k++) {
+    rmBtns[k].onclick = function () {
       items.splice(+this.dataset.idx, 1);
       renderItemsList();
     };
   }
+
+  refreshGridSelection();
 }
 
 uInput.addEventListener("input", lookupDebounced);

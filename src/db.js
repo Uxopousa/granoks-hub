@@ -45,9 +45,11 @@ function createDatabase(dbPath) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       pedido_id INTEGER NOT NULL REFERENCES pedido(id),
       producto_nombre TEXT NOT NULL,
-      precio REAL NOT NULL
+      precio REAL NOT NULL,
+      cantidad INTEGER NOT NULL DEFAULT 1
     );
   `);
+  try { db.exec("ALTER TABLE pedido_item ADD COLUMN cantidad INTEGER NOT NULL DEFAULT 1"); } catch (e) {}
 
   const promoCount = db.prepare("SELECT COUNT(*) c FROM promo").get().c;
   if (promoCount === 0) {
